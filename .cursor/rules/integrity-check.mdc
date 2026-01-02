@@ -1,0 +1,68 @@
+---
+description: Enforce cross-file semantic integrity, synchronization between HTML/JS/CSS, and data schema consistency to prevent runtime failures.
+alwaysApply: true
+globs: **/*.{html,js,css}
+---
+# SYSTEM RULE: ARCHITECTURAL INTEGRITY & CROSS-FILE SYNC
+
+## Context
+In a Vanilla JS + Tailwind CDN stack, there is no build-time compiler to catch reference errors. This rule serves as a Virtual Compiler to ensure the application remains functional across all modules. HTML is now modular (templates in `html/` directory), requiring verification across template files, `index.html` shell, JavaScript, and CSS.
+
+## 1. Mandatory Pre-Flight Checks
+- **Reference Validation**: Before proposing a change to an ID, Class, or Data-Attribute, you MUST verify all linked selectors in:
+  - CSS files
+  - `document.querySelector/getElementById` calls in JS
+  - HTML template files in `html/` directory
+  - Container IDs in `index.html` shell
+  - Template map in `js/core/template-loader.js`
+  Use `@Codebase` to search comprehensively.
+- **Template Container Mapping**: When adding new templates, verify container ID in `index.html` matches the ID in `template-loader.js` TEMPLATE_MAP.
+- **Function Contract Sync**: When calling a function from another file (e.g., `storage.js`), you MUST explicitly verify the signature at the source using `@`.
+- **Storage Schema Lock**: All `LocalStorage` operations must strictly adhere to existing key-value structures. Check `getItem/setItem` patterns to avoid duplicate keys.
+
+## 2. Dynamic Naming Conventions (Boundary Awareness)
+Maintain consistency by following these established prefix patterns for all static and dynamic elements:
+- `page-*`: Main view containers (e.g., `page-home`, `page-calendar`).
+- `session-*`: Workout execution elements (e.g., `session-timer`, `session-overlay`).
+- `phase-*`: Workout structure components (e.g., `phase-header`, `phase-card`).
+- `onboarding-*`: User setup and role selection flow.
+
+## 3. Integrity Antipatterns (DO NOT DO)
+- **Blind Renaming**: Never rename a variable/ID in one file without immediate, simultaneous updates to all referencing files (JS, CSS, HTML templates, and `index.html` shell).
+- **Template Disconnection**: Never add a template file without updating `template-loader.js` TEMPLATE_MAP and ensuring the container exists in `index.html`.
+- **Container ID Mismatch**: Never use different IDs for template containers in `index.html` vs `template-loader.js` TEMPLATE_MAP.
+- **Assumption-Based Coding**: Do not assume a utility function exists; verify it first.
+- **Orphaned Elements**: Do not remove DOM elements without cleaning their Event Listeners in JS.
+
+## 4. Verification Protocol (The 3-Step Chain)
+1. **SCAN**: Identify all connected files:
+   - HTML template files in `html/` directory
+   - Container elements in `index.html` shell
+   - JavaScript files referencing IDs/classes
+   - CSS files with selectors
+   - Template map in `template-loader.js`
+2. **SYNC**: Apply changes across all boundaries in a single atomic operation:
+   - Update template file(s) in `html/`
+   - Update container in `index.html` if needed
+   - Update `template-loader.js` TEMPLATE_MAP if adding new templates
+   - Update JavaScript references
+   - Update CSS selectors
+3. **VALIDATE**: Perform a "Mental Dry Run" to ensure the logic flow is unbroken and all references resolve correctly.
+
+## 5. Example Patterns
+
+### Example 1: Renaming an ID
+- **Task**: Rename `#start-btn` to `#begin-workout-btn`.
+- **Action**: 
+  1. Find which template contains the element (search `html/` directory).
+  2. Update the ID in the template file.
+  3. Search for `#start-btn` in `css/styles.css` and update.
+  4. Search for `getElementById('start-btn')` in all JS files and update.
+
+### Example 2: Adding a New Template
+- **Task**: Add a new page template `html/pages/athlete/settings.html`.
+- **Action**:
+  1. Create the template file in `html/pages/athlete/`.
+  2. Add container `<div id="page-settings" class="page-content hidden"></div>` to `index.html`.
+  3. Add mapping to `template-loader.js` TEMPLATE_MAP: `'page-settings': 'html/pages/athlete/settings.html'`.
+  4. Verify all IDs in the template match what JavaScript expects.

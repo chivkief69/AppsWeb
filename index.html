@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGAIN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="min-h-screen overflow-hidden">
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-container" class="w-64 glass border-r border-zinc-800 flex flex-col z-10">
+            <!-- Content will be injected from html/components/sidebar.html -->
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar">
+            <!-- Home Page -->
+            <div id="page-home" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/athlete/home.html -->
+            </div>
+
+            <!-- Calendar Page -->
+            <div id="page-calendar" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/athlete/calendar.html -->
+            </div>
+
+            <!-- Modus Operandi Page -->
+            <div id="page-modus" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/athlete/modus.html -->
+            </div>
+
+            <!-- Explore Page -->
+            <div id="page-explore" class="page-content hidden">
+                <!-- Content will be injected from html/pages/athlete/explore.html -->
+            </div>
+
+            <!-- Profile Page -->
+            <div id="page-profile" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/athlete/profile.html -->
+            </div>
+
+            <!-- Coach Home Page -->
+            <div id="page-coach-home" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/coach/home.html -->
+            </div>
+
+            <!-- Coach Calendar Page -->
+            <div id="page-coach-calendar" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/coach/calendar.html -->
+            </div>
+
+            <!-- Coach Clients Page -->
+            <div id="page-coach-clients" class="page-content p-8 hidden">
+                <!-- Content will be injected from html/pages/coach/clients.html -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Action Button (FAB) Container -->
+    <div id="voice-fab-container">
+        <!-- Content will be injected from html/components/voice-fab.html -->
+    </div>
+
+    <!-- Onboarding Role Selection Overlay -->
+    <div id="onboarding-overlay" class="onboarding-overlay hidden">
+        <!-- Content will be injected from html/overlays/onboarding.html -->
+    </div>
+
+    <!-- Session Overlay (Full-Screen Focus Mode) -->
+    <div id="session-overlay" class="session-overlay hidden fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl">
+        <!-- Content will be injected from html/overlays/session.html -->
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+---
+description: Design rules, aesthetic and visual system
+globs: **/*
+alwaysApply: true
+---
+REGAIN Design System & Aesthetic Rules
+Core Design Philosophy
+Slick, Seamless, Minimalist Black & White Aesthetic
+Pure black background with white text and glassmorphism elements
+Smooth, fluid transitions and animations throughout
+Clean, modern interface with subtle depth through glass effects
+Apple-inspired interactions with precise timing and easing
+Color Palette
+Primary Colors
+Background: #000000 (Pure black)
+Primary Text: #FFFFFF (Pure white)
+Text on White Elements: #000000 (Black - for text on white backgrounds/sliders)
+Glassmorphism Colors
+Standard Glass Background: rgba(255, 255, 255, 0.05)
+Strong Glass Background: rgba(255, 255, 255, 0.08)
+Glass Border (Standard): rgba(255, 255, 255, 0.1)
+Glass Border (Strong): rgba(255, 255, 255, 0.15)
+Glass Border (Hover): rgba(255, 255, 255, 0.2) to rgba(255, 255, 255, 0.3)
+Text Opacity Variations
+Primary Text: #FFFFFF (100% opacity)
+Secondary Text: rgba(255, 255, 255, 0.7) (70% opacity)
+Tertiary Text: rgba(255, 255, 255, 0.6) (60% opacity)
+Muted Text: rgba(255, 255, 255, 0.5) (50% opacity)
+Disabled/Other Month: rgba(255, 255, 255, 0.3) (30% opacity)
+Special Cases
+Active Navigation Background: rgba(255, 255, 255, 0.1)
+Hover Background: rgba(255, 255, 255, 0.08)
+Dark Overlay Background: rgba(0, 0, 0, 0.3) to rgba(0, 0, 0, 0.7)
+White Slider Background: rgba(255, 255, 255, 0.95)
+Typography
+Font Family
+Primary Font: 'Inter', sans-serif (applied globally)
+Font Weights Available: 300, 400, 500, 600, 700, 800
+Font Size Hierarchy
+Large Headings: 2xl-5xl (24px-48px), font-weight: 700-800
+Medium Headings: xl-2xl (20px-24px), font-weight: 600-700
+Small Headings: lg (18px), font-weight: 600
+Body Text: base (16px), font-weight: 400-500
+Small Text: sm (14px), font-weight: 400-500
+Extra Small Text: xs (12px-13px), font-weight: 400-500
+Tiny Text: 11px, font-weight: 400-500
+Text Styling Rules
+All text must be white (#FFFFFF) on black backgrounds
+Text on white elements (sliders, active states) must be black (#000000)
+Use opacity variations for hierarchy, not color changes
+Maintain consistent font-weight for similar element types
+Glassmorphism Effects
+Standard Glass (.glass)
+background: rgba(255, 255, 255, 0.05);backdrop-filter: blur(20px);-webkit-backdrop-filter: blur(20px);border: 1px solid rgba(255, 255, 255, 0.1);
+Strong Glass (.glass-strong)
+background: rgba(255, 255, 255, 0.08);backdrop-filter: blur(30px);-webkit-backdrop-filter: blur(30px);border: 1px solid rgba(255, 255, 255, 0.15);
+Glassmorphism Rules
+Always include both backdrop-filter and -webkit-backdrop-filter for browser compatibility
+Border opacity: 0.1 (standard) to 0.15 (strong)
+Background opacity: 0.05 (standard) to 0.08 (strong)
+Blur amount: 20px (standard) to 30px (strong)
+Border Radius
+Small Elements (buttons, inputs, small cards): 0.5rem (8px) to 0.75rem (12px)
+Medium Elements (cards, containers): 1rem (16px) to 1.5rem (24px)
+Large Elements (major containers, modals): 1.5rem (24px) to 2rem (32px)
+Pill-shaped Elements (toggles, badges): 50% or 9999px
+Circular Elements: 50%
+Transitions & Animations
+Standard Transition
+For all interactive elements (buttons, links, cards, etc.):
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+Page Transitions
+Fade-in animation for page content:
+animation: fadeIn 0.4s ease-in-out;@keyframes fadeIn {    from {        opacity: 0;        transform: translateY(10px);    }    to {        opacity: 1;        transform: translateY(0);    }}
+Progress Bar Animation
+For progress bars and width-based animations:
+transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+Pulse Animation
+For attention-grabbing elements (FAB, notifications):
+@keyframes pulse {    0%, 100% {        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);    }    50% {        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);    }}animation: pulse 2s infinite;
+Transition Timing Rules
+Fast Interactions: 0.2s - 0.3s (buttons, hovers)
+Medium Transitions: 0.3s - 0.4s (page changes, card states)
+Slow Animations: 0.4s - 1s (progress bars, complex animations)
+Easing Function: Always use cubic-bezier(0.4, 0, 0.2, 1) for smooth, natural motion
+Hover Effects
+Card Hover (.card-hover)
+.card-hover:hover {    transform: translateY(-2px);    border-color: rgba(255, 255, 255, 0.3);}
+Navigation Item Hover
+.nav-item:hover {    background: rgba(255, 255, 255, 0.08);    transform: translateX(4px);}
+Button Hover
+button:hover {    transform: scale(1.02) to scale(1.1);    /* Background opacity increase */    /* Border color brightening */}
+Button Active State
+button:active {    transform: scale(0.95) to scale(0.98);}
+Hover Effect Rules
+Always use subtle transforms (translateY, translateX, scale)
+Increase border opacity on hover (0.1 → 0.2 → 0.3)
+Slightly increase background opacity on hover
+Maintain smooth transitions (0.3s cubic-bezier)
+Shadows & Depth
+Box Shadows
+Subtle Shadow: 0 2px 8px rgba(0, 0, 0, 0.2) (for sliders, elevated elements)
+Medium Shadow: 0 10px 30px rgba(255, 255, 255, 0.1) (for cards on hover)
+White Glow Shadow: 0 0 0 0 rgba(255, 255, 255, 0.4) (for pulse effects)
+Depth Hierarchy
+Use glassmorphism opacity for depth (lower opacity = more depth)
+Border opacity indicates elevation (higher opacity = more elevated)
+Subtle shadows for major interactive elements only
+Interactive Elements
+Buttons
+Primary Buttons: White background (#FFFFFF or rgba(255, 255, 255, 0.95)), black text (#000000)
+Secondary Buttons: Glass background, white text, glass border
+Hover: Scale 1.02-1.1, increased border opacity
+Active: Scale 0.95-0.98
+Inputs
+Background: rgba(255, 255, 255, 0.05)
+Border: rgba(255, 255, 255, 0.1)
+Focus: Border rgba(255, 255, 255, 0.3), Background rgba(255, 255, 255, 0.08)
+Text: White (#FFFFFF)
+Toggles & Switches
+Apple-style pill-shaped toggles
+Black background with white sliding circle
+Active label: Black text (#000000)
+Inactive label: White text at 50% opacity
+Smooth sliding animation (0.3s cubic-bezier)
+Spacing & Layout
+Padding
+Small: 0.5rem (8px) to 0.75rem (12px)
+Medium: 1rem (16px) to 1.5rem (24px)
+Large: 2rem (32px) to 3rem (48px)
+Gaps
+Grid Gaps: 0.5rem (8px) to 1rem (16px)
+Flex Gaps: 1rem (16px) to 1.5rem (24px)
+Border Widths
+Standard: 1px
+Active States: 3px (for navigation active indicators)
+Scrollbar Styling
+Custom Scrollbar (.custom-scrollbar)
+width: 6px;track: rgba(255, 255, 255, 0.05);thumb: rgba(255, 255, 255, 0.2);thumb-hover: rgba(255, 255, 255, 0.3);border-radius: 3px;
+Z-Index Hierarchy
+Base Content: z-index: 1 (default)
+Sidebar/Navigation: z-index: 10
+Overlays: z-index: 50
+Modals/Full-screen Overlays: z-index: 100
+Design Principles
+Seamless & Fluid: All interactions should feel smooth and connected
+Minimal Contrast: Use opacity variations, not color changes
+Subtle Depth: Glassmorphism creates layering without heavy shadows
+Precision Timing: All animations use consistent easing and durations
+Black & White Only: No colors except black, white, and their opacity variations
+Consistent Glassmorphism: All elevated elements use glass effects
+Smooth Transitions: Every interactive element has hover/active states
+Clean Typography: Inter font family, clear hierarchy through weight and size
+Pulse for Attention: Use pulse animation sparingly for important elements
+Apple-inspired Interactions: Precise, polished, and refined feel
+Implementation Checklist
+When adding new elements, ensure:
+[ ] Uses glassmorphism (.glass or .glass-strong)
+[ ] Has hover effect with transform (translateY, translateX, or scale)
+[ ] Uses standard transition timing (0.3s cubic-bezier)
+[ ] Text is white on black, black on white elements
+[ ] Border opacity follows hierarchy (0.1 → 0.15 → 0.2 → 0.3)
+[ ] Border radius is consistent with element size
+[ ] Includes both backdrop-filter and -webkit-backdrop-filter
+[ ] Active states have appropriate visual feedback
+[ ] Follows spacing and padding guidelines
+[ ] Maintains the slick, seamless aesthetic

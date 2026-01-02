@@ -1,0 +1,139 @@
+                <div class="max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-4xl font-bold text-white mb-2">Profile</h2>
+                        <p class="text-white/60">Manage your account and training preferences</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Editable User Fields -->
+                        <div class="space-y-6">
+                            <div class="glass-strong rounded-2xl p-6 card-hover">
+                                <h3 class="text-xl font-semibold text-white mb-4">Personal Information</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Age</label>
+                                        <input type="number" value="28" class="w-full px-4 py-2 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Weight (kg)</label>
+                                        <input type="number" value="75" class="w-full px-4 py-2 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Height (cm)</label>
+                                        <input type="number" value="180" class="w-full px-4 py-2 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Body Fat %</label>
+                                        <input type="number" value="15" class="w-full px-4 py-2 rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="glass-strong rounded-2xl p-6 card-hover">
+                                <h3 class="text-xl font-semibold text-white mb-4">Training Preferences</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Time Available (hours/week)</label>
+                                        <input type="number" value="5" class="w-full px-4 py-2 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Preferred Training Location</label>
+                                        <select class="w-full px-4 py-2 rounded-lg">
+                                            <option>Home</option>
+                                            <option>Gym</option>
+                                            <option>Outside</option>
+                                            <option>Mixed</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Training Objectives</label>
+                                        <textarea class="w-full px-4 py-2 rounded-lg h-20" placeholder="e.g., Build strength, improve flexibility...">Build core strength, improve mobility, maintain fitness</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-white/70 mb-2">Why are you training?</label>
+                                        <select class="w-full px-4 py-2 rounded-lg">
+                                            <option>Maintenance</option>
+                                            <option>Marathon Prep</option>
+                                            <option>Competition Prep</option>
+                                            <option>Rehabilitation</option>
+                                            <option>General Fitness</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-4 bg-white hover:bg-white/90 text-black font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-[1.02]">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Personal Stats Dashboard -->
+                        <div class="space-y-6">
+                            <div class="glass-strong rounded-2xl p-6 card-hover">
+                                <h3 class="text-xl font-semibold text-white mb-4">Progress Charts</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm text-white/70">Weekly Sessions</span>
+                                            <span class="text-sm font-semibold text-white">4/5</span>
+                                        </div>
+                                        <div class="w-full bg-white/10 rounded-full h-3">
+                                            <div class="bg-white h-full rounded-full" style="width: 80%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm text-white/70">Monthly Goal</span>
+                                            <span class="text-sm font-semibold text-white">18/20</span>
+                                        </div>
+                                        <div class="w-full bg-white/10 rounded-full h-3">
+                                            <div class="bg-white h-full rounded-full" style="width: 90%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm text-white/70">Consistency Score</span>
+                                            <span class="text-sm font-semibold text-white">85%</span>
+                                        </div>
+                                        <div class="w-full bg-white/10 rounded-full h-3">
+                                            <div class="bg-white h-full rounded-full" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="glass-strong rounded-2xl p-6 card-hover">
+                                <h3 class="text-xl font-semibold text-white mb-4">Milestones</h3>
+                                <div class="space-y-3">
+                                    <div class="glass rounded-lg p-3 border border-zinc-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="font-medium text-white">100 Sessions</p>
+                                                <p class="text-xs text-white/60">Completed</p>
+                                            </div>
+                                            <i class="fas fa-trophy text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="glass rounded-lg p-3 border border-zinc-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="font-medium text-white">30 Day Streak</p>
+                                                <p class="text-xs text-white/60">In Progress</p>
+                                            </div>
+                                            <i class="fas fa-fire text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="glass rounded-lg p-3 border border-zinc-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="font-medium text-white">Flexibility Master</p>
+                                                <p class="text-xs text-white/60">Unlocked</p>
+                                            </div>
+                                            <i class="fas fa-star text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+

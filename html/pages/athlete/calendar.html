@@ -1,0 +1,40 @@
+                <div class="max-w-7xl mx-auto">
+                    <div class="mb-8 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-4xl font-bold text-white mb-2">Calendar</h2>
+                            <p class="text-white/60">Track your workout schedule and progress</p>
+                        </div>
+                        <!-- View Toggle Switch -->
+                        <div class="calendar-toggle-container" data-calendar="athlete">
+                            <button class="calendar-toggle" data-view="weekly">
+                                <span class="toggle-label toggle-label-active">Weekly</span>
+                                <span class="toggle-label">Monthly</span>
+                                <span class="toggle-slider"></span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="glass-strong rounded-2xl p-8 border border-zinc-800 mb-6 calendar-container" data-calendar="athlete">
+                        <div class="calendar-header grid grid-cols-7 gap-2 mb-4">
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Mon</div>
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Tue</div>
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Wed</div>
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Thu</div>
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Fri</div>
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Sat</div>
+                            <div class="text-center text-sm font-semibold text-white/60 py-2">Sun</div>
+                        </div>
+                        <div class="calendar-grid" id="calendar-grid-athlete">
+                            <!-- Calendar days will be dynamically generated -->
+                        </div>
+                    </div>
+
+                    <!-- Integration Message -->
+                    <div class="glass rounded-xl p-6 border border-zinc-800 text-center">
+                        <i class="fas fa-calendar-plus text-4xl text-white/30 mb-4"></i>
+                        <p class="text-white/60 mb-2">Google Calendar & Notion integration coming soon</p>
+                        <p class="text-sm text-white/40">Sync your workouts across platforms</p>
+                    </div>
+                </div>
+

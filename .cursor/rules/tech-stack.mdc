@@ -1,0 +1,266 @@
+---
+description: REGAIN technology stack and development guidelines
+alwaysApply: true
+---
+# REGAIN Technology Stack
+
+This document outlines the technology stack, dependencies, and best practices for the REGAIN application.
+
+## Core Stack
+
+### HTML5
+- **Usage**: Semantic HTML5 structure for the single-page application
+- **Standards**: Modern HTML5 elements and attributes
+- **Location**: `index.html` (minimal shell) + `html/` directory (modular templates)
+- **Architecture**: Modular - HTML content organized into separate template files loaded dynamically
+
+### Tailwind CSS
+- **Version**: Latest stable version via CDN
+- **Implementation**: Loaded via `<script src="https://cdn.tailwindcss.com"></script>`
+- **Usage**: Utility-first CSS framework for rapid UI development
+- **Best Practices**:
+  - Use Tailwind utility classes for layout, spacing, and responsive design
+  - Combine with custom CSS classes for REGAIN-specific styling
+  - Prefer Tailwind utilities over custom CSS when possible
+  - Use Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, etc.) for breakpoints
+
+### Vanilla JavaScript (ES6+)
+- **Version**: ES6+ (ES2015 and later)
+- **Location**: `js/app.js`
+- **Features Used**:
+  - `const` and `let` for variable declarations
+  - Arrow functions (`=>`)
+  - Template literals
+  - Classes and object-oriented patterns
+  - Array methods (`forEach`, `map`, `filter`, etc.)
+  - Destructuring (when applicable)
+  - Event listeners with modern syntax
+- **No Frameworks**: The application uses pure Vanilla JavaScript - no React, Vue, Angular, or other frameworks
+- **Architecture**: Modular class-based structure (e.g., `SPARouter`, calendar components)
+
+## External Dependencies
+
+### Font Awesome
+- **Version**: 6.4.0
+- **Source**: CDN (`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css`)
+- **Usage**: Icon library for navigation and UI elements
+- **Best Practice**: Use Font Awesome icons consistently for visual consistency
+
+### Google Fonts - Inter
+- **Font Family**: Inter
+- **Weights**: 300, 400, 500, 600, 700, 800
+- **Source**: Google Fonts CDN
+- **Usage**: Primary typography font for the entire application
+- **Reference**: See [style.mdc](mdc:.cursor/rules/style.mdc) for typography guidelines
+
+## Storage & Persistence
+
+### LocalStorage
+- **Purpose**: Client-side persistence for user preferences and state
+- **Usage Patterns**:
+  - **User Roles**: `localStorage.getItem('userRole')` / `localStorage.setItem('userRole', role)`
+  - **Calendar Views**: `localStorage.getItem('calendarView-{type}')` / `localStorage.setItem('calendarView-{type}', view)`
+- **Best Practices**:
+  - Always check for stored values before setting defaults
+  - Use descriptive keys with prefixes when namespacing (e.g., `calendarView-{type}`)
+  - Handle cases where LocalStorage might be unavailable (private browsing, etc.)
+  - Clear stored values when appropriate (e.g., logout, reset)
+
+### Storage Keys Convention
+- Use descriptive, namespaced keys
+- Format: `{feature}-{identifier}` (e.g., `calendarView-weekly`, `calendarView-monthly`)
+- Store role as: `userRole`
+
+## Styling Principles
+
+### Design System
+- **Reference**: See [style.mdc](mdc:.cursor/rules/style.mdc) for complete design system rules
+- **Core Principles**:
+  - **Pure Black & White Palette**: No colors except black (#000000), white (#FFFFFF), and opacity variations
+  - **Glassmorphism**: Standard glass effects with backdrop-filter blur
+  - **Apple-inspired Animations**: Smooth, precise transitions with cubic-bezier easing
+  - **Minimalist Aesthetic**: Clean, seamless interface with subtle depth
+
+### Custom CSS
+- **Location**: `css/styles.css`
+- **Purpose**: REGAIN Design System implementation
+- **Key Features**:
+  - Glassmorphism classes (`.glass`, `.glass-strong`)
+  - Custom scrollbar styling (`.custom-scrollbar`)
+  - Animation keyframes (fadeIn, pulse)
+  - Transition utilities
+  - Component-specific styles
+
+### Styling Approach
+1. **Primary**: Use Tailwind CSS utility classes
+2. **Secondary**: Use custom CSS classes from `styles.css` for REGAIN-specific effects
+3. **Avoid**: Inline styles (except for dynamic values)
+4. **Consistency**: Follow the design system rules in [style.mdc](mdc:.cursor/rules/style.mdc)
+
+## Best Practices
+
+### Code Organization
+
+#### JavaScript Structure
+```javascript
+// Use ES6+ features
+const element = document.querySelector('.selector');
+const items = document.querySelectorAll('.items');
+
+// Use arrow functions for callbacks
+items.forEach(item => {
+    item.addEventListener('click', (e) => {
+        // Handle click
+    });
+});
+
+// Use classes for complex components
+class ComponentName {
+    constructor(element) {
+        this.element = element;
+        this.init();
+    }
+    
+    init() {
+        // Initialization logic
+    }
+}
+
+// Use template literals for dynamic content
+const html = `<div class="card">${content}</div>`;
+```
+
+#### Modular Code
+- **Single Responsibility**: Each function/class should have one clear purpose
+- **Separation of Concerns**: Keep routing, UI, and data logic separate
+- **Reusability**: Create reusable utility functions
+- **Naming**: Use descriptive, camelCase names for functions and variables
+- **Comments**: Add comments for complex logic, not obvious code
+
+#### Avoid Unnecessary Dependencies
+- **No Build Tools**: The application runs directly in the browser (no bundlers, transpilers)
+- **No Package Managers**: Dependencies are loaded via CDN
+- **Lightweight**: Keep the application fast and seamless by avoiding heavy libraries
+- **When to Add**: Only add external libraries if absolutely necessary and they provide significant value
+
+### Performance Guidelines
+
+#### Loading Strategy
+- **CDN Resources**: Load external resources (Tailwind, Font Awesome, Google Fonts) via CDN
+- **Preconnect**: Use `<link rel="preconnect">` for faster font loading
+- **Defer Scripts**: Load JavaScript at the end of the body or use defer attribute
+- **Template Loading**: HTML templates are loaded in parallel at startup via `fetch()` API before DOM initialization, ensuring all elements exist when JavaScript runs
+
+#### Code Optimization
+- **Minimize DOM Queries**: Cache frequently accessed DOM elements
+- **Event Delegation**: Use event delegation for dynamic content when appropriate
+- **Efficient Selectors**: Use specific selectors for better performance
+- **Avoid Unnecessary Re-renders**: Only update DOM when data actually changes
+
+### Browser Compatibility
+
+#### Target Browsers
+- Modern browsers with ES6+ support
+- Chrome, Firefox, Safari, Edge (latest versions)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+
+#### Feature Support
+- **LocalStorage**: Check availability before use
+- **Backdrop Filter**: Use `-webkit-backdrop-filter` for Safari compatibility
+- **CSS Grid/Flexbox**: Fully supported in target browsers
+- ES6+ Features: Use modern JavaScript features confidently
+
+## Versioning & Updates
+
+### CDN Resources
+- **Tailwind CSS**: Latest stable version (auto-updates via CDN)
+- **Font Awesome**: 6.4.0 (specific version for stability)
+- **Google Fonts**: Latest (auto-updates)
+
+### Update Strategy
+- **Tailwind**: Monitor for breaking changes when CDN updates
+- **Font Awesome**: Update version number in HTML when needed
+- **Custom Code**: Version control via Git
+
+## Development Workflow
+
+### File Structure
+- **HTML Shell**: `index.html` (minimal shell with empty containers)
+- **HTML Templates**: `html/` directory (modular templates organized by type)
+  - `html/components/` - Reusable UI components
+  - `html/pages/{role}/` - Page templates by role
+  - `html/overlays/` - Overlay templates
+- **JavaScript**: `js/app.js` (main application logic)
+- **CSS**: `css/styles.css` (design system styles)
+- **Assets**: `assets/` (images, icons, etc.)
+
+### Adding New Features
+1. **HTML Templates**: 
+   - Add new page templates to `html/pages/{role}/`
+   - Add new components to `html/components/`
+   - Add new overlays to `html/overlays/`
+   - Update `js/core/template-loader.js` TEMPLATE_MAP with new template paths
+   - Add container element to `index.html` if needed (with matching ID)
+2. **JavaScript**: Add functionality in appropriate module following existing patterns
+3. **Styling**: Use Tailwind classes first, then custom CSS if needed
+4. **Storage**: Use LocalStorage for persistence when needed
+5. **Testing**: Test in target browsers before committing
+
+### Code Style
+- **Indentation**: Use consistent spacing (2 or 4 spaces - match existing code)
+- **Quotes**: Use single quotes for JavaScript strings
+- **Semicolons**: Include semicolons for consistency
+- **Line Length**: Keep lines readable (80-100 characters when possible)
+
+## Anti-Patterns to Avoid
+
+### ❌ Don't Do This
+```javascript
+// Don't use var
+var oldVariable = 'value';
+
+// Don't use jQuery or other frameworks
+$('.element').click(function() { ... });
+
+// Don't add unnecessary dependencies
+import { someLibrary } from 'some-package';
+
+// Don't use inline styles (except dynamic values)
+<div style="color: red;">Content</div>
+
+// Don't pollute global scope
+window.myFunction = function() { ... };
+```
+
+### ✅ Do This Instead
+```javascript
+// Use const/let
+const variable = 'value';
+
+// Use vanilla JavaScript
+document.querySelector('.element').addEventListener('click', () => { ... });
+
+// Use vanilla JavaScript or CDN if absolutely needed
+// Load via <script> tag in HTML
+
+// Use CSS classes
+<div class="text-red-500">Content</div>
+
+// Use modules or namespaced objects
+const App = {
+    myFunction: function() { ... }
+};
+```
+
+## Summary
+
+REGAIN is built with a **lightweight, modern stack**:
+- **HTML5** for structure (modular templates in `html/` directory)
+- **Tailwind CSS (CDN)** for utility-first styling
+- **Vanilla JavaScript (ES6+)** for functionality
+- **Template Loading System** - Dynamic HTML template loading and injection
+- **LocalStorage** for client-side persistence
+- **Custom CSS** for REGAIN Design System
+- **No frameworks or build tools** - pure, fast, seamless
+
+The goal is to keep the application **lightweight, fast, and maintainable** while providing a **slick, seamless user experience** that aligns with the REGAIN Design System. The modular HTML architecture improves maintainability without compromising performance or functionality.

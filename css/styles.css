@@ -1,0 +1,680 @@
+/* ============================================================================
+   REGAIN DESIGN SYSTEM - CSS CUSTOM PROPERTIES
+   ============================================================================ */
+:root {
+    /* Colors */
+    --color-bg-primary: #000000;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: rgba(255, 255, 255, 0.7);
+    --color-text-tertiary: rgba(255, 255, 255, 0.6);
+    --color-text-muted: rgba(255, 255, 255, 0.5);
+    --color-text-disabled: rgba(255, 255, 255, 0.3);
+    --color-text-on-white: #000000;
+    
+    /* Glassmorphism Backgrounds */
+    --glass-bg-standard: rgba(255, 255, 255, 0.05);
+    --glass-bg-strong: rgba(255, 255, 255, 0.08);
+    --glass-bg-hover: rgba(255, 255, 255, 0.1);
+    --glass-bg-overlay: rgba(0, 0, 0, 0.95);
+    --glass-bg-dark: rgba(0, 0, 0, 0.5);
+    --glass-bg-dark-hover: rgba(0, 0, 0, 0.6);
+    
+    /* Glassmorphism Borders */
+    --glass-border-standard: rgba(255, 255, 255, 0.1);
+    --glass-border-strong: rgba(255, 255, 255, 0.15);
+    --glass-border-hover: rgba(255, 255, 255, 0.2);
+    --glass-border-active: rgba(255, 255, 255, 0.3);
+    --glass-border-focus: rgba(255, 255, 255, 0.4);
+    
+    /* Glassmorphism Blur */
+    --glass-blur-standard: 20px;
+    --glass-blur-strong: 30px;
+    --glass-blur-overlay: 40px;
+    --glass-blur-small: 10px;
+    
+    /* Transitions */
+    --transition-standard: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-width: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-width-slow: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-opacity: opacity 0.3s ease-in-out;
+    --transition-color: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-transform: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Border Radius */
+    --radius-xs: 3px;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+    --radius-pill: 18px;
+    --radius-circle: 50%;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Z-Index */
+    --z-base: 1;
+    --z-sidebar: 10;
+    --z-overlay: 50;
+    --z-modal: 100;
+    --z-session: 200;
+    
+    /* Shadows */
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 10px 30px rgba(255, 255, 255, 0.1);
+    --shadow-white: 0 0 0 0 rgba(255, 255, 255, 0.4);
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+}
+
+/* ============================================================================
+   GLASSMORPHISM UTILITIES
+   ============================================================================ */
+.glass {
+    background: var(--glass-bg-standard);
+    backdrop-filter: blur(var(--glass-blur-standard));
+    -webkit-backdrop-filter: blur(var(--glass-blur-standard));
+    border: 1px solid var(--glass-border-standard);
+}
+
+.glass-strong {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur-strong));
+    -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+    border: 1px solid var(--glass-border-strong);
+}
+
+/* ============================================================================
+   CUSTOM SCROLLBAR
+   ============================================================================ */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--glass-bg-standard);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--glass-border-hover);
+    border-radius: var(--radius-xs);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--glass-border-active);
+}
+
+/* ============================================================================
+   TRANSITIONS & ANIMATIONS
+   ============================================================================ */
+button, a, .interactive {
+    transition: var(--transition-standard);
+}
+
+.card-hover {
+    transition: var(--transition-standard);
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    border-color: var(--glass-border-active);
+}
+
+/* Page fade-in animation */
+.page-content {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* FAB pulse animation */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: var(--shadow-white);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+.fab-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Phase Variations Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+.phase-variations {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* ============================================================================
+   NAVIGATION
+   ============================================================================ */
+.nav-item.active {
+    background: var(--glass-bg-hover);
+    border-left: 3px solid var(--color-text-primary);
+}
+
+.nav-item.active i,
+.nav-item.active span {
+    color: var(--color-text-primary);
+}
+
+.nav-item:hover {
+    background: var(--glass-bg-strong);
+    transform: translateX(4px);
+}
+
+/* ============================================================================
+   EXPLORE FEED (TikTok/Reels Style)
+   ============================================================================ */
+#page-explore {
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.explore-feed {
+    scroll-snap-type: y mandatory;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+}
+
+.explore-card {
+    scroll-snap-align: start;
+    height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.reel-video {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+.reel-overlay-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: var(--spacing-md);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    width: 100%;
+    z-index: var(--z-sidebar);
+}
+
+.reel-actions {
+    position: absolute;
+    right: var(--spacing-sm);
+    bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    z-index: var(--z-sidebar);
+}
+
+.reel-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: var(--glass-bg-dark);
+    backdrop-filter: blur(var(--glass-blur-small));
+    border: 1px solid var(--glass-border-standard);
+    border-radius: var(--radius-circle);
+    cursor: pointer;
+    transition: var(--transition-standard);
+}
+
+.reel-action-btn:hover {
+    background: var(--glass-bg-hover);
+    transform: scale(1.1);
+    border-color: var(--glass-border-active);
+}
+
+.reel-action-btn:active {
+    transform: scale(0.95);
+}
+
+/* ============================================================================
+   FORM ELEMENTS
+   ============================================================================ */
+input, select, textarea {
+    background: var(--glass-bg-standard);
+    border: 1px solid var(--glass-border-standard);
+    color: var(--color-text-primary);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--glass-border-active);
+    background: var(--glass-bg-strong);
+}
+
+/* ============================================================================
+   PROGRESS BARS
+   ============================================================================ */
+.progress-bar {
+    transition: var(--transition-width);
+}
+
+/* ============================================================================
+   ONBOARDING OVERLAY
+   ============================================================================ */
+.onboarding-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-bg-primary);
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.onboarding-container {
+    max-width: 900px;
+    width: 100%;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.onboarding-header {
+    margin-bottom: 3rem;
+}
+
+.onboarding-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.onboarding-card {
+    background: var(--glass-bg-standard);
+    backdrop-filter: blur(var(--glass-blur-standard));
+    -webkit-backdrop-filter: blur(var(--glass-blur-standard));
+    border: 1px solid var(--glass-border-standard);
+    border-radius: var(--radius-xl);
+    padding: 3rem var(--spacing-lg);
+    cursor: pointer;
+    transition: var(--transition-standard);
+    text-align: center;
+    width: 100%;
+}
+
+.onboarding-card:hover {
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-border-active);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.onboarding-card:active {
+    transform: translateY(-2px);
+}
+
+.onboarding-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-options {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.onboarding-option {
+    cursor: pointer;
+    border: 1px solid var(--glass-border-standard);
+    transition: var(--transition-standard);
+}
+
+.onboarding-option:hover {
+    border-color: var(--glass-border-active);
+    transform: translateY(-2px);
+}
+
+.onboarding-option.selected {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--glass-border-focus);
+    border-width: 2px;
+}
+
+.onboarding-scale {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.onboarding-scale-btn {
+    cursor: pointer;
+    border: 1px solid var(--glass-border-standard);
+    transition: var(--transition-standard);
+}
+
+.onboarding-scale-btn:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-active);
+}
+
+.onboarding-scale-btn.selected {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--glass-border-focus);
+    border-width: 2px;
+}
+
+/* ============================================================================
+   VOICE INPUT
+   ============================================================================ */
+.voice-mic-button {
+    cursor: pointer;
+    border: 1px solid var(--glass-border-standard);
+    transition: var(--transition-standard);
+}
+
+.voice-mic-button:hover {
+    border-color: var(--glass-border-active);
+    transform: scale(1.05);
+}
+
+.voice-mic-button.voice-listening {
+    animation: pulse 2s infinite;
+    border-color: var(--glass-border-focus);
+    background: var(--glass-bg-hover);
+}
+
+.voice-mic-button.voice-processing {
+    border-color: var(--glass-border-active);
+    background: var(--glass-bg-strong);
+}
+
+.voice-mic-button.voice-success {
+    border-color: var(--glass-border-focus);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.voice-mic-button.voice-error {
+    border-color: var(--glass-border-hover);
+    background: var(--glass-bg-standard);
+}
+
+.voice-transcription {
+    border: 1px solid var(--glass-border-standard);
+    transition: var(--transition-standard);
+}
+
+/* ============================================================================
+   CALENDAR TOGGLE SWITCH (Apple Style)
+   ============================================================================ */
+.calendar-toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.calendar-toggle {
+    position: relative;
+    width: 140px;
+    height: 36px;
+    background: var(--glass-bg-dark);
+    backdrop-filter: blur(var(--glass-blur-standard));
+    -webkit-backdrop-filter: blur(var(--glass-blur-standard));
+    border: 1px solid var(--glass-border-standard);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    transition: var(--transition-standard);
+}
+
+.calendar-toggle:hover {
+    border-color: var(--glass-border-hover);
+    background: var(--glass-bg-dark-hover);
+}
+
+.calendar-toggle:active {
+    transform: scale(0.98);
+}
+
+.toggle-label {
+    position: relative;
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: var(--transition-color);
+    z-index: 2;
+}
+
+.toggle-label-active {
+    color: var(--color-text-on-white);
+}
+
+.toggle-slider {
+    position: absolute;
+    width: 68px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    transition: var(--transition-transform);
+    z-index: 1;
+    left: 2px;
+    box-shadow: var(--shadow-subtle);
+}
+
+.calendar-toggle[data-view="monthly"] .toggle-slider {
+    transform: translateX(68px);
+}
+
+.calendar-toggle[data-view="weekly"] .toggle-label:first-child {
+    color: var(--color-text-on-white);
+}
+
+.calendar-toggle[data-view="weekly"] .toggle-label:last-child {
+    color: var(--color-text-muted);
+}
+
+.calendar-toggle[data-view="monthly"] .toggle-label:first-child {
+    color: var(--color-text-muted);
+}
+
+.calendar-toggle[data-view="monthly"] .toggle-label:last-child {
+    color: var(--color-text-on-white);
+}
+
+/* ============================================================================
+   CALENDAR GRID
+   ============================================================================ */
+.calendar-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-grid {
+    transition: var(--transition-opacity);
+}
+
+.calendar-grid.fade-out {
+    opacity: 0;
+}
+
+.calendar-grid.fade-in {
+    opacity: 1;
+}
+
+/* Weekly View */
+.calendar-grid.weekly-view {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--spacing-xs);
+}
+
+.calendar-grid.weekly-view .calendar-day {
+    min-height: 120px;
+    padding: var(--spacing-sm);
+    background: var(--glass-bg-standard);
+    backdrop-filter: blur(var(--glass-blur-small));
+    -webkit-backdrop-filter: blur(var(--glass-blur-small));
+    border: 1px solid var(--glass-border-standard);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-standard);
+}
+
+.calendar-grid.weekly-view .calendar-day:hover {
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-border-hover);
+    transform: translateY(-2px);
+}
+
+/* Monthly View */
+.calendar-grid.monthly-view {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--spacing-xs);
+}
+
+.calendar-grid.monthly-view .calendar-day {
+    aspect-ratio: 1;
+    padding: var(--radius-md);
+    background: var(--glass-bg-standard);
+    backdrop-filter: blur(var(--glass-blur-small));
+    -webkit-backdrop-filter: blur(var(--glass-blur-small));
+    border: 1px solid var(--glass-border-standard);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-standard);
+}
+
+.calendar-grid.monthly-view .calendar-day:hover {
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-border-hover);
+    transform: translateY(-2px);
+}
+
+/* Calendar Day States */
+.calendar-day {
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.calendar-day.other-month {
+    opacity: 0.3;
+}
+
+.calendar-day.today {
+    background: var(--glass-bg-hover) !important;
+    border-color: var(--glass-border-active) !important;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.calendar-day-number {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-day-events {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: auto;
+}
+
+.calendar-session-badge {
+    font-size: 10px;
+    line-height: 1.2;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================================================
+   SESSION OVERLAY (Full-Screen Focus Mode)
+   ============================================================================ */
+.session-overlay {
+    background: var(--glass-bg-overlay);
+    backdrop-filter: blur(var(--glass-blur-overlay));
+    -webkit-backdrop-filter: blur(var(--glass-blur-overlay));
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.session-progress-container {
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--glass-border-standard);
+}
+
+.session-progress-bar {
+    transition: var(--transition-width-slow);
+}
+
+.session-variation-display {
+    min-height: 0;
+}
+
+.session-cues {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.session-cues .custom-scrollbar {
+    scrollbar-width: thin;
+}
+
+.session-controls {
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--glass-border-standard);
+}

@@ -1,0 +1,332 @@
+---
+description: Project directory structure and important files overview
+alwaysApply: false
+---
+
+# Project Structure
+
+This document outlines the directory structure and important files in the AppsWeb project.
+
+## Root Directory Structure
+
+```
+AppsWeb/
+├── .cursor/
+│   └── rules/
+│       ├── cursor-rules.mdc          # How to add/edit Cursor rules
+│       ├── self-improve.mdc          # Rule improvement guidelines
+│       ├── style.mdc                 # REGAIN Design System rules
+│       ├── product-essence.mdc        # REGAIN product philosophy & methodology
+│       ├── tech-stack.mdc            # Technology stack and best practices
+│       ├── integrity-check.mdc       # Cross-file reference integrity rules
+│       └── project-structure.mdc     # This file
+├── assets/                           # Static assets (images, icons, etc.)
+├── css/
+│   └── styles.css                    # Main stylesheet with REGAIN design system (CSS variables)
+├── html/                             # Modular HTML templates
+│   ├── components/                   # Reusable UI components
+│   │   ├── sidebar.html             # Sidebar navigation component
+│   │   └── voice-fab.html           # Floating action button component
+│   ├── pages/                        # Page templates
+│   │   ├── athlete/                 # Athlete page templates
+│   │   │   ├── home.html
+│   │   │   ├── calendar.html
+│   │   │   ├── modus.html
+│   │   │   ├── explore.html
+│   │   │   └── profile.html
+│   │   └── coach/                   # Coach page templates
+│   │       ├── home.html
+│   │       ├── calendar.html
+│   │       └── clients.html
+│   └── overlays/                     # Overlay templates
+│       ├── onboarding.html          # Onboarding overlay (role selection + questions)
+│       └── session.html             # Session overlay (full-screen workout player)
+├── js/
+│   ├── app.js                        # Main entry point: Router & App initialization
+│   ├── core/                         # Shared "Brain" - No role dependencies
+│   │   ├── router.js                # SPARouter class (role-agnostic)
+│   │   ├── storage.js               # LocalStorage helpers (roles, stats, preferences, userProfile, trainingSystem)
+│   │   ├── workout-engine.js        # Session generation logic, progressive overload, milestone tracking
+│   │   ├── ui-utils.js              # Common UI functions (glassmorphism, transitions)
+│   │   ├── template-loader.js       # HTML template loading and injection system
+│   │   └── constants.js             # Shared constants (terminology, config, frameworks, phase criteria)
+│   ├── onboarding/                   # Onboarding flow (shared)
+│   │   ├── onboarding-manager.js    # OnboardingManager class
+│   │   └── voice-input.js           # VoiceInputManager class
+│   ├── athlete/                     # Athlete-specific functionality
+│   │   ├── dashboard.js             # Athlete dashboard/homepage logic, expandable phases, swap functionality
+│   │   ├── calendar.js              # Athlete calendar view with training system integration
+│   │   ├── session-view.js          # Active workout player/interface (FULLY IMPLEMENTED)
+│   │   └── modus-operandi.js        # Athlete settings/preferences (placeholder)
+│   ├── coach/                       # Coach-specific functionality
+│   │   ├── dashboard.js             # Coach dashboard/homepage
+│   │   ├── client-list.js           # Client management interface (placeholder)
+│   │   ├── plan-builder.js          # Training plan creation/editing (placeholder)
+│   │   └── calendar.js              # Coach calendar view
+│   └── data/
+│       └── exercises.json           # Exercise database with variations, target muscles, technique cues
+├── index.html                        # Minimal HTML shell - templates loaded dynamically
+└── AppsWeb_31-12-2025.code-workspace # VS Code workspace file
+```
+
+## Important Files and Folders
+
+### Core Application Files
+
+#### `index.html`
+- **Purpose**: Minimal HTML shell - structural containers for dynamically loaded templates
+- **Key Features**:
+  - Single-page application structure
+  - Empty containers for sidebar, pages, overlays, and components
+  - All page containers maintain their IDs and classes for JavaScript compatibility
+  - Templates are loaded at startup via `template-loader.js`
+  - Uses Tailwind CSS via CDN
+  - Font Awesome icons
+  - Inter font family
+- **Location**: Project root
+- **Architecture**: Modular - actual content is in `html/` directory templates
+
+#### `js/app.js`
+- **Purpose**: Main entry point - template loading, router and app initialization
+- **Key Features**:
+  - Loads all HTML templates at startup via `template-loader.js`
+  - Role management (Athlete/Coach)
+  - App initialization and routing setup
+  - Onboarding manager initialization
+  - Role-specific app initialization
+- **Location**: `js/app.js`
+- **Uses ES6 Modules**: Imports from core (including template-loader), onboarding, athlete, and coach modules
+- **Initialization Order**: Templates load first, then DOM initialization, then router setup
+
+#### `html/`
+- **Purpose**: Modular HTML templates organized by type
+- **Structure**:
+  - `components/`: Reusable UI components (sidebar, voice FAB)
+  - `pages/athlete/`: Athlete page templates (home, calendar, modus, explore, profile)
+  - `pages/coach/`: Coach page templates (home, calendar, clients)
+  - `overlays/`: Overlay templates (onboarding, session)
+- **Loading**: Templates are loaded at application startup via `template-loader.js` and injected into containers in `index.html`
+- **Benefits**: Improved maintainability, context density, and separation of concerns
+
+#### `js/core/`
+- **Purpose**: Shared core functionality - no role dependencies
+- **Files**:
+  - `router.js`: SPARouter class for client-side routing
+  - `storage.js`: LocalStorage helpers for roles, preferences, onboarding data, userProfile, trainingSystem, sessionProgress
+  - `workout-engine.js`: Session generation logic, progressive overload tracking, milestone management, variation swapping (reads from exercises.json)
+  - `ui-utils.js`: Common UI functions (glassmorphism, transitions, navigation)
+  - `template-loader.js`: HTML template loading and injection system - fetches templates and injects them into DOM containers
+  - `constants.js`: REGAIN terminology, configuration constants, framework definitions, phase criteria
+
+#### `js/onboarding/`
+- **Purpose**: Onboarding flow for new users
+- **Files**:
+  - `onboarding-manager.js`: Manages onboarding state and flow
+  - `voice-input.js`: Web Speech API integration for voice input
+
+#### `js/athlete/`
+- **Purpose**: Athlete-specific functionality
+- **Files**:
+  - `dashboard.js`: Athlete homepage, expandable phase previews, variation swapping, session initialization
+  - `calendar.js`: Athlete calendar view manager with training system integration
+  - `session-view.js`: **FULLY IMPLEMENTED** - Active workout player with full-screen focus mode, progress tracking, milestone updates
+  - `modus-operandi.js`: Athlete settings/preferences (placeholder)
+
+#### `js/coach/`
+- **Purpose**: Coach-specific functionality
+- **Files**:
+  - `dashboard.js`: Coach homepage and calendar initialization
+  - `calendar.js`: Coach calendar view manager
+  - `client-list.js`: Client management interface (placeholder)
+  - `plan-builder.js`: Training plan creation/editing (placeholder)
+
+#### `js/data/`
+- **Purpose**: Data files
+- **Files**:
+  - `exercises.json`: Exercise database with variations, target muscles, technique cues, difficulty scores, progression types
+
+#### `css/styles.css`
+- **Purpose**: Main stylesheet implementing the REGAIN Design System
+- **Key Features**:
+  - **CSS Custom Properties**: All design tokens centralized in `:root` variables
+  - Black & white minimalist aesthetic
+  - Glassmorphism effects (.glass, .glass-strong)
+  - Custom scrollbar styling
+  - Smooth transitions and animations
+  - Apple-inspired interactions
+  - Typography hierarchy
+  - Session overlay styles
+  - Calendar styles
+- **Location**: `css/styles.css`
+- **Refactored**: Uses CSS variables for maintainability
+
+### Configuration and Rules
+
+#### `.cursor/rules/`
+- **Purpose**: Cursor AI rules and guidelines for the project
+- **Files**:
+  - `cursor-rules.mdc`: Guidelines for adding/editing Cursor rules
+  - `self-improve.mdc`: Rule improvement and maintenance guidelines
+  - `style.mdc`: REGAIN Design System aesthetic rules
+  - `product-essence.mdc`: REGAIN product philosophy, methodology, and terminology
+  - `tech-stack.mdc`: Technology stack, dependencies, and best practices
+  - `integrity-check.mdc`: Cross-file reference integrity rules (HTML/JS/CSS synchronization)
+  - `project-structure.mdc`: This file - project structure documentation
+
+### Assets
+
+#### `assets/`
+- **Purpose**: Static assets directory
+- **Current State**: Empty (ready for images, icons, fonts, etc.)
+- **Usage**: Place all static media files here (images, icons, fonts, etc.)
+
+### Workspace Files
+
+#### `AppsWeb_31-12-2025.code-workspace`
+- **Purpose**: VS Code workspace configuration file
+- **Note**: Current workspace file (dated version)
+
+## File Organization Guidelines
+
+### Adding New Files
+
+1. **HTML Templates**: Place in `html/` directory by type
+   - Reusable components: `html/components/`
+   - Page templates: `html/pages/{role}/` (athlete or coach)
+   - Overlay templates: `html/overlays/`
+   - **Note**: Templates contain only inner content (not wrapper elements with IDs)
+   - **IDs and classes**: All IDs, classes, and data attributes must be preserved exactly
+
+2. **JavaScript Files**: Place in appropriate subdirectory
+   - Main entry point: `js/app.js`
+   - Core/shared utilities: `js/core/` (including template-loader.js)
+   - Onboarding logic: `js/onboarding/`
+   - Athlete-specific: `js/athlete/`
+   - Coach-specific: `js/coach/`
+   - Data files: `js/data/`
+   - **All JS files use ES6 modules** (import/export)
+
+3. **Stylesheet Files**: Place in `css/` directory
+   - Main styles: `css/styles.css` (uses CSS custom properties)
+   - Additional stylesheets: `css/component-name.css` (if needed)
+
+4. **Static Assets**: Place in `assets/` directory
+   - Images: `assets/images/`
+   - Icons: `assets/icons/`
+   - Fonts: `assets/fonts/`
+
+5. **Cursor Rules**: Place in `.cursor/rules/` directory
+   - Use kebab-case naming: `rule-name.mdc`
+   - Follow structure defined in `cursor-rules.mdc`
+
+### Project Type
+
+This is a **single-page application (SPA)** built with:
+- Vanilla JavaScript (ES6+ modules, no framework)
+- Tailwind CSS (via CDN)
+- Font Awesome icons
+- Custom CSS for REGAIN Design System (with CSS custom properties)
+- Local storage for state management
+- **Modular architecture** with ES6 imports/exports
+- **Modular HTML templates** - HTML content organized into separate template files in `html/` directory
+- **Template loading system** - Templates loaded dynamically at startup and injected into DOM containers
+
+### Key Design Principles
+
+- Follow REGAIN Design System (see `style.mdc`) 
+- Black & white minimalist aesthetic
+- Glassmorphism effects throughout
+- Smooth, Apple-inspired interactions
+- Role-based navigation (Athlete/Coach)
+
+## Navigation Structure
+
+The application uses a sidebar navigation with the following main sections:
+- Home
+- Calendar
+- Modus Operandi
+- Explore
+- (Additional role-specific sections)
+
+All navigation is handled client-side via JavaScript routing in `js/core/router.js`.
+
+## Module Dependencies
+
+```
+app.js
+  ├── core/template-loader.js  # Loads HTML templates first
+  ├── core/router.js
+  ├── core/storage.js
+  ├── core/ui-utils.js
+  ├── onboarding/onboarding-manager.js
+  │   └── onboarding/voice-input.js
+  ├── athlete/dashboard.js
+  │   ├── athlete/calendar.js
+  │   ├── athlete/session-view.js
+  │   └── core/workout-engine.js
+  └── coach/dashboard.js
+      └── coach/calendar.js
+
+template-loader.js
+  └── html/**/*.html (fetch)  # Loads all templates from html/ directory
+
+workout-engine.js
+  ├── data/exercises.json (fetch)
+  └── core/constants.js
+
+session-view.js
+  ├── core/workout-engine.js
+  └── core/storage.js
+```
+
+## Architecture Principles
+
+1. **Separation of Concerns**: Core utilities are role-agnostic, role-specific logic is isolated
+2. **ES6 Modules**: All JavaScript uses ES6 import/export for clear dependencies
+3. **Modular HTML**: HTML content is organized into separate template files by type (components, pages, overlays)
+4. **Template Loading**: Templates are loaded at startup and injected into DOM containers, maintaining identical behavior to monolithic HTML
+5. **Single Responsibility**: Each module has one clear purpose
+6. **Reusability**: Core utilities shared across roles
+7. **Scalability**: Easy to add new features without touching unrelated code
+8. **ID Preservation**: All element IDs, classes, and data attributes are preserved exactly to maintain JavaScript compatibility
+
+## Keeping This Document Updated
+
+### When to Update
+
+This document should be updated whenever:
+
+1. **New Files/Folders Created**: Add new files to the appropriate section
+2. **File Purpose Changes**: Update descriptions when functionality changes (e.g., placeholder → implemented)
+3. **New Dependencies**: Update module dependencies diagram when imports change
+4. **Structure Reorganization**: Update directory tree when folders are moved/renamed
+5. **Major Feature Additions**: Document new features and their locations
+
+### Update Checklist
+
+When adding new files or making structural changes:
+
+- [ ] Update the directory tree in "Root Directory Structure"
+- [ ] Add file description in "Important Files and Folders" if significant
+- [ ] Update "Module Dependencies" if imports change
+- [ ] Update relevant section descriptions
+- [ ] Mark placeholders vs. implemented files clearly
+- [ ] If adding HTML templates, update `js/core/template-loader.js` TEMPLATE_MAP
+- [ ] Ensure template IDs match container IDs in `index.html`
+
+### Best Practices
+
+1. **Keep It Current**: Update this file as part of the development workflow
+2. **Be Specific**: Include implementation status (placeholder vs. fully implemented)
+3. **Document Purpose**: Explain what each file does, not just where it is
+4. **Track Changes**: Note when files transition from placeholder to implemented
+5. **Reference Other Rules**: Link to related rule files (style.mdc, tech-stack.mdc, etc.)
+
+### Automation Note
+
+While automated structure detection would be ideal, the current approach requires manual updates to ensure:
+- **Accurate Descriptions**: File purposes and implementation status
+- **Context**: Why files exist and how they relate
+- **Guidance**: Best practices for where to place new files
+
+**Recommendation**: Update this file as part of your commit workflow when adding new files or making structural changes.
