@@ -31,24 +31,54 @@ export function initAuthUI() {
  * @param {string} form - Form to show ('login', 'signup', 'reset')
  */
 export function showAuthOverlay(form = 'login') {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-ui.js:33',message:'showAuthOverlay called',data:{form:form,overlayExists:!!document.getElementById('auth-overlay'),documentReady:document.readyState},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    
+    console.log('[DEBUG] showAuthOverlay called with form:', form);
+    
     const overlay = document.getElementById('auth-overlay');
     if (!overlay) {
-        console.error('Auth overlay not found');
+        console.error('[DEBUG] Auth overlay not found in DOM');
+        console.error('[DEBUG] Document ready state:', document.readyState);
+        console.error('[DEBUG] Available elements with "auth" in id:', 
+            Array.from(document.querySelectorAll('[id*="auth"]')).map(el => el.id));
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-ui.js:36',message:'Auth overlay not found',data:{form:form,documentReady:document.readyState},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         return;
     }
+    
+    console.log('[DEBUG] Auth overlay found, current classes:', overlay.className);
+    console.log('[DEBUG] Auth overlay has hidden class:', overlay.classList.contains('hidden'));
     
     currentForm = form;
     // Remove hidden from container
     overlay.classList.remove('hidden');
     
+    console.log('[DEBUG] Auth overlay hidden class removed');
+    console.log('[DEBUG] Auth overlay now has classes:', overlay.className);
+    console.log('[DEBUG] Auth overlay computed display:', window.getComputedStyle(overlay).display);
+    console.log('[DEBUG] Auth overlay computed visibility:', window.getComputedStyle(overlay).visibility);
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-ui.js:43',message:'Auth overlay shown',data:{form:form,hasHiddenClass:overlay.classList.contains('hidden'),computedDisplay:window.getComputedStyle(overlay).display,computedVisibility:window.getComputedStyle(overlay).visibility},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    
     // Show appropriate form
     showForm(form);
+    
+    console.log('[DEBUG] showAuthOverlay completed');
 }
 
 /**
  * Hide authentication overlay
  */
 export function hideAuthOverlay() {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-ui.js:51',message:'hideAuthOverlay called',data:{overlayExists:!!document.getElementById('auth-overlay')},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    
     const overlay = document.getElementById('auth-overlay');
     if (overlay) {
         overlay.classList.add('hidden');

@@ -16,18 +16,85 @@ import {
 } from '../services/authService.js';
 import { saveUserProfile, getUserProfile } from '../services/dbService.js';
 import { migrateLocalStorageToFirestore } from './data-migration.js';
+import { waitForPersistenceReady } from '../../config/firebase.config.js';
 
 // Auth state
-let currentUser = null;
+// Initialize to undefined so onAuthStateChanged doesn't fire immediately
+// until we've properly initialized the auth state
+let currentUser = undefined;
 let authStateListeners = [];
 
 /**
  * Initialize authentication manager
  * Sets up auth state listener and checks for existing session
+ * FIX: Waits for persistence to be configured before setting up listeners
  */
-export function initAuthManager() {
+export async function initAuthManager() {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-manager.js:28',message:'initAuthManager called - waiting for persistence',data:{initialUser:getCurrentUser() ? getCurrentUser().uid : null,isE2E:typeof window !== 'undefined' && window.__E2E_TEST__ === true},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    
+    console.log('[DEBUG] initAuthManager: Waiting for persistence to be ready...');
+    
+    // CRITICAL: Wait for persistence to be configured before setting up listeners
+    // This ensures onAuthStateChanged fires with the correct persistence mode
+    await waitForPersistenceReady();
+    
+    // FIX: In E2E mode, explicitly sign out any existing user to ensure clean state
+    // This prevents onAuthStateChanged from firing with cached user state
+    // CRITICAL: We must sign out BEFORE setting up onAuthStateChange listener
+    const isE2ETest = typeof window !== 'undefined' && window.__E2E_TEST__ === true;
+    if (isE2ETest) {
+        console.log('[DEBUG] E2E mode detected - ensuring clean auth state');
+        const existingUser = getCurrentUser();
+        console.log('[DEBUG] E2E mode: Existing user before sign out:', existingUser ? existingUser.uid : 'null');
+        
+        if (existingUser) {
+            console.log('[DEBUG] E2E mode: Signing out existing user to ensure clean state');
+            try {
+                await signOutUser();
+                // Wait for sign out to fully propagate
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // Verify sign out worked
+                const userAfterSignOut = getCurrentUser();
+                if (userAfterSignOut) {
+                    console.error('[DEBUG] E2E mode: ERROR - User still exists after sign out!', userAfterSignOut.uid);
+                    // Force set to null as fallback
+                    currentUser = null;
+                } else {
+                    console.log('[DEBUG] E2E mode: User signed out successfully - verified null');
+                    currentUser = null; // Explicitly set to null
+                }
+            } catch (error) {
+                console.warn('[DEBUG] E2E mode: Failed to sign out:', error);
+                // Force set to null as fallback
+                currentUser = null;
+            }
+        } else {
+            console.log('[DEBUG] E2E mode: No existing user to sign out - setting currentUser to null');
+            currentUser = null; // Explicitly set to null in E2E mode
+        }
+    } else {
+        // Not E2E mode - get actual current user
+        currentUser = getCurrentUser();
+    }
+    
+    console.log('[DEBUG] initAuthManager: Persistence ready, setting up onAuthStateChanged');
+    console.log('[DEBUG] Final currentUser state before setting up listener:', currentUser ? currentUser.uid : 'null');
+    console.log('[DEBUG] isE2ETest:', isE2ETest);
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-manager.js:32',message:'Persistence ready - setting up onAuthStateChange',data:{isE2E:isE2ETest,userAfterSignOut:getCurrentUser() ? getCurrentUser().uid : null,currentUserSet:currentUser ? currentUser.uid : null},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    
     // Listen for auth state changes
     onAuthStateChange(async (user) => {
+        // #region agent log
+        const authStateChangeTime = Date.now();
+        fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-manager.js:35',message:'onAuthStateChange fired',data:{userId:user ? user.uid : null,previousUserId:currentUser ? currentUser.uid : null,hasUser:!!user},timestamp:authStateChangeTime,sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+        
         const previousUser = currentUser;
         currentUser = user;
         
@@ -47,33 +114,44 @@ export function initAuthManager() {
         notifyAuthStateListeners(user);
     });
     
-    // Check initial auth state
-    currentUser = getCurrentUser();
+    // Note: currentUser is already set above (before setting up listener)
+    // In E2E mode, it's explicitly set to null
+    // In normal mode, it's set to getCurrentUser()
+    // This ensures onAuthStateChanged subscribers get the correct initial state
     if (currentUser) {
         console.log('User already signed in:', currentUser.uid);
+    } else {
+        console.log('[DEBUG] No user signed in - ready for auth overlay');
     }
 }
 
 /**
  * Handle user sign in - migrate data if needed
+ * Non-blocking: Doesn't wait for Firestore, processes in background
  * @param {import('firebase/auth').User} user - Firebase user object
  */
 async function handleUserSignIn(user) {
-    try {
-        // Check if user profile exists in Firestore
-        const profile = await getUserProfile(user.uid);
-        
-        if (!profile) {
-            // New user - check for localStorage data to migrate
-            console.log('New user detected, checking for localStorage data to migrate...');
-            await migrateLocalStorageToFirestore(user.uid);
-        } else {
-            console.log('Existing user profile found in Firestore');
+    // Process in background - don't block UI
+    Promise.resolve().then(async () => {
+        try {
+            // Use cache-first pattern - returns immediately if cache exists
+            const profile = await getUserProfile(user.uid, { returnStale: true });
+            
+            if (!profile) {
+                // New user - check for localStorage data to migrate
+                console.log('New user detected, checking for localStorage data to migrate...');
+                // Migration can also be non-blocking
+                migrateLocalStorageToFirestore(user.uid).catch(err => {
+                    console.warn('Migration failed, will retry later:', err);
+                });
+            } else {
+                console.log('User profile loaded (from cache or Firestore)');
+            }
+        } catch (error) {
+            // Log but don't block - user is already signed in
+            console.warn('Background profile check failed (non-critical):', error.message);
         }
-    } catch (error) {
-        console.error('Error handling user sign in:', error);
-        // Don't block sign in if migration fails
-    }
+    });
 }
 
 /**
@@ -155,6 +233,7 @@ export async function login(email, password) {
 
 /**
  * Sign up with email and password
+ * Non-blocking profile creation - doesn't wait for Firestore
  * @param {string} email - User email
  * @param {string} password - User password
  * @param {string} displayName - User display name
@@ -164,9 +243,10 @@ export async function signup(email, password, displayName) {
     try {
         const userCredential = await signUp(email, password, displayName);
         
-        // Create initial user profile
+        // Create initial user profile (non-blocking)
         if (userCredential.user) {
-            await saveUserProfile(userCredential.user.uid, {
+            // Save profile in background - don't block signup
+            saveUserProfile(userCredential.user.uid, {
                 email: email,
                 displayName: displayName,
                 role: null, // Will be set during onboarding
@@ -174,6 +254,9 @@ export async function signup(email, password, displayName) {
                 discomforts: [],
                 equipment: [],
                 goals: []
+            }).catch(err => {
+                console.warn('Profile creation failed (will retry):', err);
+                // Don't throw - user is already signed up
             });
         }
         
@@ -213,26 +296,36 @@ export async function resetPassword(email) {
 
 /**
  * Sign in with Google
+ * Non-blocking profile creation - doesn't wait for Firestore
  * @returns {Promise<import('firebase/auth').UserCredential>}
  */
 export async function loginWithGoogle() {
     try {
         const userCredential = await signInWithGoogle();
         
-        // Create profile if new user
+        // Create profile if new user (non-blocking)
         if (userCredential.user) {
-            const profile = await getUserProfile(userCredential.user.uid);
-            if (!profile) {
-                await saveUserProfile(userCredential.user.uid, {
-                    email: userCredential.user.email,
-                    displayName: userCredential.user.displayName,
-                    role: null,
-                    preferredDisciplines: [],
-                    discomforts: [],
-                    equipment: [],
-                    goals: []
+            // Check profile in background - don't block login
+            getUserProfile(userCredential.user.uid, { returnStale: true })
+                .then(profile => {
+                    if (!profile) {
+                        // Create profile in background
+                        saveUserProfile(userCredential.user.uid, {
+                            email: userCredential.user.email,
+                            displayName: userCredential.user.displayName,
+                            role: null,
+                            preferredDisciplines: [],
+                            discomforts: [],
+                            equipment: [],
+                            goals: []
+                        }).catch(err => {
+                            console.warn('Profile creation failed (will retry):', err);
+                        });
+                    }
+                })
+                .catch(() => {
+                    // Silently handle - profile check will happen in handleUserSignIn
                 });
-            }
         }
         
         return userCredential;

@@ -26,52 +26,65 @@ async function ensureImports() {
 
 /**
  * Get the current user role
+ * Cache-First: Returns localStorage immediately, updates from Firestore in background
  * @returns {Promise<string|null>} 'athlete', 'coach', or null
  */
 export async function getUserRole() {
     await ensureImports();
     const user = getAuthUser();
     
+    // STEP 1: Return localStorage immediately (instant)
+    const localRole = localStorage.getItem('userRole');
+    
     if (user) {
-        // Try Firestore first
-        try {
-            const profile = await getFirestoreProfile(user.uid);
-            if (profile?.role) {
-                return profile.role;
-            }
-        } catch (error) {
-            console.warn('Error getting role from Firestore, falling back to localStorage:', error);
-        }
+        // STEP 2: Update from Firestore in background (non-blocking)
+        getFirestoreProfile(user.uid)
+            .then(profile => {
+                if (profile?.role && profile.role !== localRole) {
+                    // Update localStorage if Firestore has different value
+                    localStorage.setItem('userRole', profile.role);
+                }
+            })
+            .catch(error => {
+                // Silently fail - we already returned localRole
+                // Only log if we have no localRole at all
+                if (!localRole) {
+                    console.warn('Error getting role from Firestore:', error);
+                }
+            });
     }
     
-    // Fallback to localStorage
-    return localStorage.getItem('userRole');
+    // Return immediately with cached value
+    return localRole;
 }
 
 /**
  * Set the user role
+ * Optimistic update: Saves to localStorage immediately, syncs to Firestore in background
  * @param {string} role - 'athlete' or 'coach'
  */
 export async function setUserRole(role) {
     await ensureImports();
     const user = getAuthUser();
     
-    if (user) {
-        // Save to Firestore
-        try {
-            const profile = await getFirestoreProfile(user.uid);
-            await saveFirestoreProfile(user.uid, {
-                ...profile,
-                role: role
-            });
-        } catch (error) {
-            console.error('Error saving role to Firestore:', error);
-            // Fall through to localStorage fallback
-        }
-    }
-    
-    // Always save to localStorage as fallback
+    // STEP 1: Save to localStorage immediately (optimistic update)
     localStorage.setItem('userRole', role);
+    
+    // STEP 2: Sync to Firestore in background (non-blocking)
+    if (user) {
+        getFirestoreProfile(user.uid, { returnStale: true })
+            .then(profile => {
+                return saveFirestoreProfile(user.uid, {
+                    ...profile,
+                    role: role
+                });
+            })
+            .catch(error => {
+                // Silently fail - localStorage is already updated
+                // Firestore persistence will sync when network is available
+                console.warn('Background role sync failed (non-critical):', error.message);
+            });
+    }
 }
 
 /**
@@ -122,6 +135,7 @@ export function clearUserData() {
 
 /**
  * Get user profile (merge onboarding data with training data)
+ * Cache-First: Returns localStorage immediately, updates from Firestore in background
  * @returns {Promise<Object>} User profile object
  */
 export async function getUserProfile() {
@@ -136,39 +150,46 @@ export async function getUserProfile() {
         preferredDisciplines: []
     };
     
-    if (user) {
-        // Try Firestore first
-        try {
-            const profile = await getFirestoreProfile(user.uid);
-            if (profile) {
-                return { ...baseProfile, ...profile };
-            }
-        } catch (error) {
-            console.warn('Error getting profile from Firestore, falling back to localStorage:', error);
-        }
-    }
-    
-    // Fallback to localStorage
+    // STEP 1: Return localStorage data immediately (instant)
     const onboardingData = getOnboardingData();
     const storedProfile = localStorage.getItem('userProfile');
     
+    let localProfile = { ...baseProfile };
+    
     // Merge onboarding data
     if (onboardingData) {
-        baseProfile.discomforts = onboardingData.discomforts || [];
-        baseProfile.preferredDisciplines = onboardingData.primaryDiscipline || [];
+        localProfile.discomforts = onboardingData.discomforts || [];
+        localProfile.preferredDisciplines = onboardingData.primaryDiscipline || [];
     }
     
     // Merge stored profile
     if (storedProfile) {
         try {
             const parsed = JSON.parse(storedProfile);
-            return { ...baseProfile, ...parsed };
+            localProfile = { ...localProfile, ...parsed };
         } catch (e) {
             console.error('Error parsing userProfile:', e);
         }
     }
     
-    return baseProfile;
+    // STEP 2: Update from Firestore in background (non-blocking)
+    if (user) {
+        getFirestoreProfile(user.uid)
+            .then(profile => {
+                if (profile) {
+                    // Merge Firestore data with local
+                    const merged = { ...baseProfile, ...localProfile, ...profile };
+                    // Update localStorage for next time
+                    localStorage.setItem('userProfile', JSON.stringify(merged));
+                }
+            })
+            .catch(error => {
+                // Silently fail - we already returned localProfile
+            });
+    }
+    
+    // Return immediately with cached/local data
+    return localProfile;
 }
 
 /**
@@ -195,28 +216,39 @@ export async function saveUserProfile(profile) {
 
 /**
  * Get training system
+ * Cache-First: Returns localStorage immediately, updates from Firestore in background
  * @returns {Promise<Object|null>} Training system object or null
  */
 export async function getTrainingSystem() {
     await ensureImports();
     const user = getAuthUser();
     
+    // STEP 1: Return localStorage immediately (instant)
+    const stored = localStorage.getItem('trainingSystem');
+    let localSystem = stored ? JSON.parse(stored) : null;
+    
+    // STEP 2: Update from Firestore in background (non-blocking)
+    // getAllTrainingSystems now uses cache-first and won't throw errors
+    // It will return cached data or empty array if network fails
     if (user) {
-        // Try Firestore first - get latest training system
-        try {
-            const systems = await getAllTrainingSystems(user.uid);
-            if (systems && systems.length > 0) {
-                // Return the most recent one
-                return systems[0];
-            }
-        } catch (error) {
-            console.warn('Error getting training system from Firestore, falling back to localStorage:', error);
-        }
+        getAllTrainingSystems(user.uid)
+            .then(systems => {
+                if (systems && Array.isArray(systems) && systems.length > 0) {
+                    const latest = systems[0];
+                    // Update localStorage if we got new data
+                    localStorage.setItem('trainingSystem', JSON.stringify(latest));
+                    // Note: localSystem is already returned, this update happens in background
+                }
+            })
+            .catch(error => {
+                // This shouldn't happen anymore as getAllTrainingSystems returns empty array on error
+                // But keeping for safety
+                console.warn('Background training systems update failed (non-critical):', error.message);
+            });
     }
     
-    // Fallback to localStorage
-    const stored = localStorage.getItem('trainingSystem');
-    return stored ? JSON.parse(stored) : null;
+    // Return immediately with cached data
+    return localSystem;
 }
 
 /**
