@@ -30,71 +30,24 @@ let authStateListeners = [];
  * FIX: Waits for persistence to be configured before setting up listeners
  */
 export async function initAuthManager() {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-manager.js:28',message:'initAuthManager called - waiting for persistence',data:{initialUser:getCurrentUser() ? getCurrentUser().uid : null,isE2E:typeof window !== 'undefined' && window.__E2E_TEST__ === true},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-    
     console.log('[DEBUG] initAuthManager: Waiting for persistence to be ready...');
     
     // CRITICAL: Wait for persistence to be configured before setting up listeners
     // This ensures onAuthStateChanged fires with the correct persistence mode
     await waitForPersistenceReady();
     
-    // FIX: In E2E mode, explicitly sign out any existing user to ensure clean state
-    // This prevents onAuthStateChanged from firing with cached user state
-    // CRITICAL: We must sign out BEFORE setting up onAuthStateChange listener
-    const isE2ETest = typeof window !== 'undefined' && window.__E2E_TEST__ === true;
-    if (isE2ETest) {
-        console.log('[DEBUG] E2E mode detected - ensuring clean auth state');
-        const existingUser = getCurrentUser();
-        console.log('[DEBUG] E2E mode: Existing user before sign out:', existingUser ? existingUser.uid : 'null');
-        
-        if (existingUser) {
-            console.log('[DEBUG] E2E mode: Signing out existing user to ensure clean state');
-            try {
-                await signOutUser();
-                // Wait for sign out to fully propagate
-                await new Promise(resolve => setTimeout(resolve, 200));
-                
-                // Verify sign out worked
-                const userAfterSignOut = getCurrentUser();
-                if (userAfterSignOut) {
-                    console.error('[DEBUG] E2E mode: ERROR - User still exists after sign out!', userAfterSignOut.uid);
-                    // Force set to null as fallback
-                    currentUser = null;
-                } else {
-                    console.log('[DEBUG] E2E mode: User signed out successfully - verified null');
-                    currentUser = null; // Explicitly set to null
-                }
-            } catch (error) {
-                console.warn('[DEBUG] E2E mode: Failed to sign out:', error);
-                // Force set to null as fallback
-                currentUser = null;
-            }
-        } else {
-            console.log('[DEBUG] E2E mode: No existing user to sign out - setting currentUser to null');
-            currentUser = null; // Explicitly set to null in E2E mode
-        }
-    } else {
-        // Not E2E mode - get actual current user
-        currentUser = getCurrentUser();
-    }
+    // REFACTORED: Respect Firebase's authentication state - DO NOT force sign out
+    // Firebase's browserLocalPersistence handles session persistence correctly
+    // We trust Firebase's state management instead of clearing it manually
+    
+    // Get the actual current user from Firebase (respects persistence)
+    currentUser = getCurrentUser();
     
     console.log('[DEBUG] initAuthManager: Persistence ready, setting up onAuthStateChanged');
-    console.log('[DEBUG] Final currentUser state before setting up listener:', currentUser ? currentUser.uid : 'null');
-    console.log('[DEBUG] isE2ETest:', isE2ETest);
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-manager.js:32',message:'Persistence ready - setting up onAuthStateChange',data:{isE2E:isE2ETest,userAfterSignOut:getCurrentUser() ? getCurrentUser().uid : null,currentUserSet:currentUser ? currentUser.uid : null},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
+    console.log('[DEBUG] Initial currentUser state:', currentUser ? currentUser.uid : 'null');
     
     // Listen for auth state changes
     onAuthStateChange(async (user) => {
-        // #region agent log
-        const authStateChangeTime = Date.now();
-        fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth-manager.js:35',message:'onAuthStateChange fired',data:{userId:user ? user.uid : null,previousUserId:currentUser ? currentUser.uid : null,hasUser:!!user},timestamp:authStateChangeTime,sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
-        
         const previousUser = currentUser;
         currentUser = user;
         
@@ -114,10 +67,9 @@ export async function initAuthManager() {
         notifyAuthStateListeners(user);
     });
     
-    // Note: currentUser is already set above (before setting up listener)
-    // In E2E mode, it's explicitly set to null
-    // In normal mode, it's set to getCurrentUser()
-    // This ensures onAuthStateChanged subscribers get the correct initial state
+    // Note: currentUser is set to the actual Firebase auth state (getCurrentUser())
+    // This respects Firebase's persistence and allows the session to persist across page reloads
+    // onAuthStateChanged subscribers will receive the correct initial state from Firebase
     if (currentUser) {
         console.log('User already signed in:', currentUser.uid);
     } else {
@@ -212,7 +164,7 @@ export function getAuthUser() {
  * @returns {boolean} True if user is authenticated
  */
 export function isAuthenticated() {
-    return currentUser !== null;
+    return currentUser != null; // Returns false for both null and undefined
 }
 
 /**
@@ -295,39 +247,15 @@ export async function resetPassword(email) {
 }
 
 /**
- * Sign in with Google
- * Non-blocking profile creation - doesn't wait for Firestore
- * @returns {Promise<import('firebase/auth').UserCredential>}
+ * Sign in with Google using popup
+ * Opens a popup window for Google sign-in and returns the result immediately
+ * @returns {Promise<import('firebase/auth').UserCredential>} User credential with authenticated user
  */
 export async function loginWithGoogle() {
     try {
+        // signInWithGoogle now uses popup, which returns credentials immediately
         const userCredential = await signInWithGoogle();
-        
-        // Create profile if new user (non-blocking)
-        if (userCredential.user) {
-            // Check profile in background - don't block login
-            getUserProfile(userCredential.user.uid, { returnStale: true })
-                .then(profile => {
-                    if (!profile) {
-                        // Create profile in background
-                        saveUserProfile(userCredential.user.uid, {
-                            email: userCredential.user.email,
-                            displayName: userCredential.user.displayName,
-                            role: null,
-                            preferredDisciplines: [],
-                            discomforts: [],
-                            equipment: [],
-                            goals: []
-                        }).catch(err => {
-                            console.warn('Profile creation failed (will retry):', err);
-                        });
-                    }
-                })
-                .catch(() => {
-                    // Silently handle - profile check will happen in handleUserSignIn
-                });
-        }
-        
+        // Profile creation will be handled in handleUserSignIn() via onAuthStateChanged
         return userCredential;
     } catch (error) {
         console.error('Google login error:', error);

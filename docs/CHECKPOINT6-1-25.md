@@ -17,7 +17,7 @@ REGAIN es una aplicación web de una sola página (SPA) diseñada como un sistem
 - ✅ **Calendario**: Implementado con vistas semanal y mensual
 - ✅ **Dashboard atleta**: Implementado con fases expandibles
 - ⚠️ **Funcionalidades coach**: Parcialmente implementadas (placeholders)
-- ⚠️ **Modus operandi**: Placeholder
+- ⚠️ **My Training**: Placeholder
 - ⚠️ **Perfil**: Placeholder
 
 ---
@@ -52,7 +52,7 @@ AppsWeb/
 │       │   ├── calendar.html            # Calendario atleta
 │       │   ├── explore.html             # Feed tipo TikTok/Reels
 │       │   ├── home.html                # Dashboard atleta
-│       │   ├── modus.html               # Configuración atleta
+│       │   ├── modus.html               # My Training - Configuración atleta
 │       │   └── profile.html             # Perfil atleta
 │       └── coach/
 │           ├── calendar.html             # Calendario coach
@@ -73,7 +73,7 @@ AppsWeb/
 │   ├── athlete/                         # Funcionalidad específica atleta
 │   │   ├── calendar.js                  # Vista de calendario atleta
 │   │   ├── dashboard.js                 # Dashboard/homepage atleta
-│   │   ├── modus-operandi.js            # Configuración atleta (placeholder)
+│   │   ├── modus-operandi.js            # My Training - Configuración atleta (placeholder)
 │   │   └── session-view.js              # ✅ COMPLETO - Reproductor de sesión
 │   ├── coach/                           # Funcionalidad específica coach
 │   │   ├── calendar.js                  # Vista de calendario coach
@@ -213,7 +213,7 @@ AppsWeb/
 ### ⚠️ Parcialmente Implementados / Placeholders
 
 #### `js/athlete/modus-operandi.js`
-- Placeholder para configuración del atleta
+- Placeholder para My Training - configuración del atleta
 
 #### `js/athlete/profile.js` (no existe archivo JS)
 - Página HTML existe pero sin funcionalidad JS
@@ -359,7 +359,7 @@ AppsWeb/
 ## 🚀 Próximos Pasos Sugeridos
 
 ### Funcionalidades Pendientes
-1. Completar `modus-operandi.js` (configuración atleta)
+1. Completar `modus-operandi.js` (My Training - configuración atleta)
 2. Implementar perfil de atleta
 3. Completar funcionalidades de coach:
    - Gestión de clientes
@@ -411,7 +411,7 @@ AppsWeb/
 - [x] Workout engine funcional
 - [x] Sistema de diseño REGAIN
 - [x] Persistencia LocalStorage
-- [ ] Modus operandi atleta
+- [ ] My Training atleta
 - [ ] Perfil atleta
 - [ ] Funcionalidades coach completas
 - [ ] Feed Explore funcional completo

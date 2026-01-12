@@ -16,7 +16,10 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+    // Note: Vite automatically handles history API fallback for SPAs
+    // The real issue is Firebase authDomain configuration - see docs/FIREBASE_REDIRECT_FIX.md
   },
+  plugins: [],
   resolve: {
     alias: {
       '@': resolve(__dirname, '../js')

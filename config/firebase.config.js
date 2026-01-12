@@ -58,10 +58,6 @@ if (missingVars.length > 0) {
 // This runs before any page scripts execute, allowing us to configure persistence correctly
 const isE2ETest = typeof window !== 'undefined' && window.__E2E_TEST__ === true;
 
-// #region agent log
-fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firebase.config.js:59',message:'E2E flag detection',data:{isE2ETest:isE2ETest,windowDefined:typeof window !== 'undefined',flagValue:typeof window !== 'undefined' ? window.__E2E_TEST__ : 'N/A'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-// #endregion
-
 // Log E2E detection for debugging (will show in test output)
 console.log('[DEBUG] E2E test detection:', {
   isE2ETest,
@@ -89,19 +85,12 @@ try {
   // We create a promise that resolves when persistence is ready, and export a function
   // to wait for it. This ensures onAuthStateChanged doesn't fire with stale state.
   const persistence = isE2ETest ? inMemoryPersistence : browserLocalPersistence;
-  
-  // #region agent log
   const persistenceStartTime = Date.now();
-  fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firebase.config.js:80',message:'setPersistence called',data:{isE2ETest:isE2ETest,persistenceType:isE2ETest ? 'inMemoryPersistence' : 'browserLocalPersistence',currentUser:auth.currentUser ? auth.currentUser.uid : null},timestamp:persistenceStartTime,sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
   
   // Create promise that resolves when persistence is ready
   console.log('[DEBUG] Setting persistence:', isE2ETest ? 'inMemoryPersistence' : 'browserLocalPersistence');
   persistenceReadyPromise = setPersistence(auth, persistence).then(() => {
-    // #region agent log
     const persistenceEndTime = Date.now();
-    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firebase.config.js:91',message:'setPersistence completed',data:{isE2ETest:isE2ETest,persistenceType:isE2ETest ? 'inMemoryPersistence' : 'browserLocalPersistence',duration:persistenceEndTime - persistenceStartTime,currentUser:auth.currentUser ? auth.currentUser.uid : null},timestamp:persistenceEndTime,sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     
     if (isE2ETest) {
       console.log('✅ Firebase Auth using inMemoryPersistence (E2E test mode)');
@@ -110,10 +99,6 @@ try {
       console.log('✅ Firebase Auth using browserLocalPersistence (normal mode)');
     }
   }).catch((persistenceError) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/915a47a4-1527-472d-b5cb-4d7f3b093620',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'firebase.config.js:102',message:'setPersistence failed',data:{error:persistenceError.message,isE2ETest:isE2ETest},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-    
     // If setPersistence fails, log but don't throw - allow auth to proceed
     // This can happen if persistence is already set or if there's a conflict
     console.warn('⚠️ Failed to set Firebase Auth persistence:', persistenceError);

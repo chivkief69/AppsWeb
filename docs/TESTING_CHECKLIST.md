@@ -126,7 +126,7 @@ This document contains comprehensive testing checklists for verifying that the a
 - [ ] Sign in as athlete
 - [ ] Verify: Home page loads correctly
 - [ ] Verify: Calendar page loads correctly
-- [ ] Verify: Modus Operandi page loads correctly
+- [ ] Verify: My Training page loads correctly
 - [ ] Verify: Explore page loads correctly
 - [ ] Verify: Profile page loads correctly
 

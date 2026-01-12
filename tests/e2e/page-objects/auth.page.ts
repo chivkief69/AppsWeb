@@ -38,7 +38,62 @@ export class AuthPage {
    * Wait for auth overlay to be visible
    */
   async waitForAuthOverlay() {
-    await this.authOverlay.waitFor({ state: 'visible', timeout: 5000 });
+    // Wait for the overlay element to exist first (don't check visibility yet)
+    await this.page.waitForSelector('#auth-overlay', { state: 'attached', timeout: 10000 });
+    
+    // Also wait for template content to be loaded (check for inner content)
+    await this.page.waitForFunction(
+      () => {
+        const overlay = document.getElementById('auth-overlay');
+        if (!overlay) return false;
+        // Check if template content has been loaded
+        const hasContent = overlay.innerHTML.trim() !== '' || 
+                         overlay.querySelector('#auth-login') !== null ||
+                         overlay.querySelector('.auth-overlay') !== null;
+        return hasContent;
+      },
+      { timeout: 10000 }
+    );
+    
+    // Then wait for it to be visible (not hidden and display is not none)
+    await this.page.waitForFunction(
+      () => {
+        const overlay = document.getElementById('auth-overlay');
+        if (!overlay) return false;
+        const hasHidden = overlay.classList.contains('hidden');
+        const computedStyle = window.getComputedStyle(overlay);
+        const display = computedStyle.display;
+        const visibility = computedStyle.visibility;
+        const opacity = computedStyle.opacity;
+        
+        // Overlay is visible if:
+        // 1. Doesn't have 'hidden' class
+        // 2. Display is not 'none'
+        // 3. Visibility is not 'hidden'
+        // 4. Opacity is not '0'
+        const isVisible = !hasHidden && 
+                         display !== 'none' && 
+                         visibility !== 'hidden' && 
+                         opacity !== '0';
+        
+        // Also check if the inner template content is visible
+        const templateContent = overlay.querySelector('.auth-overlay') || overlay.firstElementChild;
+        if (templateContent) {
+          const templateStyle = window.getComputedStyle(templateContent);
+          const templateDisplay = templateStyle.display;
+          const templateVisibility = templateStyle.visibility;
+          const templateOpacity = templateStyle.opacity;
+          
+          return isVisible && 
+                 templateDisplay !== 'none' && 
+                 templateVisibility !== 'hidden' && 
+                 templateOpacity !== '0';
+        }
+        
+        return isVisible;
+      },
+      { timeout: 15000 }
+    );
   }
 
   /**

@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock Firebase Auth before importing authService
+const mockAuth = {
+  currentUser: null,
+};
 vi.mock('../../../config/firebase.config.js', () => ({
-  auth: {
-    currentUser: null,
-  },
+  auth: mockAuth,
+  waitForPersistenceReady: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('firebase/auth', () => ({
@@ -19,6 +21,8 @@ vi.mock('firebase/auth', () => ({
   updateProfile: vi.fn(),
   GoogleAuthProvider: vi.fn(() => ({})),
   signInWithPopup: vi.fn(),
+  signInWithRedirect: vi.fn(),
+  getRedirectResult: vi.fn(),
 }));
 
 describe('Auth Service', () => {
@@ -32,6 +36,9 @@ describe('Auth Service', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    
+    // Reset auth.currentUser to null
+    mockAuth.currentUser = null;
     
     // Import Firebase mocks
     const firebaseAuth = await import('firebase/auth');
@@ -180,40 +187,45 @@ describe('Auth Service', () => {
   });
 
   describe('signInWithGoogle', () => {
-    it('should sign in with Google', async () => {
-      const mockUserCredential = {
-        user: { uid: 'user123', email: 'test@example.com' },
-      };
-      mockSignInWithPopup.mockResolvedValue(mockUserCredential);
+    it('should initiate Google sign in with redirect', async () => {
+      // signInWithGoogle uses redirect, not popup
+      const firebaseAuth = await import('firebase/auth');
+      const mockSignInWithRedirect = firebaseAuth.signInWithRedirect as ReturnType<typeof vi.fn>;
+      mockSignInWithRedirect.mockResolvedValue(undefined);
 
-      const result = await authService.signInWithGoogle();
+      await authService.signInWithGoogle();
 
-      expect(mockSignInWithPopup).toHaveBeenCalled();
-      expect(result).toEqual(mockUserCredential);
+      expect(mockSignInWithRedirect).toHaveBeenCalled();
+      // Note: signInWithGoogle uses redirect, so it doesn't return a credential
+      // The result is handled via getGoogleRedirectResult()
     });
 
     it('should throw error on Google sign in failure', async () => {
-      const error = new Error('Popup closed');
-      mockSignInWithPopup.mockRejectedValue(error);
+      const firebaseAuth = await import('firebase/auth');
+      const mockSignInWithRedirect = firebaseAuth.signInWithRedirect as ReturnType<typeof vi.fn>;
+      const error = new Error('Redirect failed');
+      mockSignInWithRedirect.mockRejectedValue(error);
 
       await expect(authService.signInWithGoogle()).rejects.toThrow(
-        'Google sign in failed: Popup closed'
+        'Google sign in failed: Redirect failed'
       );
     });
   });
 
   describe('updateUserProfile', () => {
     it('should update user profile', async () => {
-      const mockAuth = { currentUser: { uid: 'user123' } };
-      vi.doMock('../../../config/firebase.config.js', () => ({
-        auth: mockAuth,
-      }));
+      // Set currentUser on the mock auth object
+      const mockUser = { uid: 'user123' };
+      mockAuth.currentUser = mockUser;
       
       mockUpdateProfile.mockResolvedValue(undefined);
 
       await authService.updateUserProfile({ displayName: 'New Name' });
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith(expect.anything(), { displayName: 'New Name' });
+      expect(mockUpdateProfile).toHaveBeenCalledWith(mockUser, { displayName: 'New Name' });
+      
+      // Clean up
+      mockAuth.currentUser = null;
     });
 
     it('should throw error if no user is signed in', async () => {

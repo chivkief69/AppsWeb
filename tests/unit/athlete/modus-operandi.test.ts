@@ -1,21 +1,21 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ModusOperandi } from '../../../js/athlete/modus-operandi.js';
+import { MyTraining } from '../../../js/athlete/modus-operandi.js';
 
-describe('ModusOperandi', () => {
-  let modusOperandi: ModusOperandi;
+describe('MyTraining', () => {
+  let myTraining: MyTraining;
 
   beforeEach(() => {
-    modusOperandi = new ModusOperandi();
+    myTraining = new MyTraining();
   });
 
   describe('constructor', () => {
-    it('should create ModusOperandi instance', () => {
-      expect(modusOperandi).toBeInstanceOf(ModusOperandi);
+    it('should create MyTraining instance', () => {
+      expect(myTraining).toBeInstanceOf(MyTraining);
     });
 
     it('should initialize as placeholder', () => {
       // This is a placeholder class, so we just check it can be instantiated
-      expect(modusOperandi).toBeDefined();
+      expect(myTraining).toBeDefined();
     });
   });
 });
