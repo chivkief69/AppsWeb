@@ -326,27 +326,35 @@ Firestore will automatically create indexes for:
 
 ---
 
-## Security Rules (Future)
+## Security Rules ✅ IMPLEMENTED
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can only read/write their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      match /trainingSystems/{systemId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      match /milestones/{milestoneId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-    }
-  }
-}
+**Status**: Security rules are implemented and ready for deployment.
+
+**File**: `firestore.rules` (project root)
+
+The Firestore security rules enforce:
+- ✅ Users can only read/write their own data (`users/{userId}`)
+- ✅ Authentication is required for all operations
+- ✅ Sub-collections are protected (trainingSystems, milestones, workouts, sessions)
+- ✅ Collection-level queries are denied (prevents listing all users)
+- ✅ Field validation on user profile writes (email, role)
+- ✅ Default deny-all for any undefined collections
+
+**Deployment**:
+
+1. **Update project ID**: Edit `.firebaserc` with your Firebase project ID
+2. **Install Firebase CLI**: `npm install` (firebase-tools added to devDependencies)
+3. **Login**: `firebase login`
+4. **Deploy rules**: `npm run firebase:deploy-rules`
+
+**Note**: Rules must be deployed to Firebase before they take effect. The rules file exists locally but is not active until deployed.
+
+**Testing**: Use Firebase Emulator Suite to test rules locally:
+```bash
+npm run firebase:test-rules
 ```
+
+See `firestore.rules` for the complete implementation with helper functions and comprehensive validation.
 
 ---
 

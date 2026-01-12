@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================================================
+    // HELPER FUNCTIONS
+    // ============================================================================
+    
+    /**
+     * Check if user is authenticated
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Check if the authenticated user owns the data
+     * @param {string} userId - The user ID in the document path
+     */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Validate that role is valid
+     */
+    function isValidRole() {
+      return request.resource.data.role is string 
+        && request.resource.data.role in ['athlete', 'coach'];
+    }
+    
+    /**
+     * Validate that email is a string
+     */
+    function hasValidEmail() {
+      return request.resource.data.email is string
+        && request.resource.data.email.size() > 0;
+    }
+    
+    // ============================================================================
+    // USERS COLLECTION
+    // ============================================================================
+    
+    /**
+     * Users collection: Users can only read/write their own profile
+     * - Authenticated users can read/write their own user document
+     * - Collection-level queries are denied (prevents listing all users)
+     */
+    match /users/{userId} {
+      // Allow read/write only if user owns the document
+      allow read, write: if isOwner(userId);
+      
+      // Explicitly deny collection-level queries (listing all users)
+      allow list: if false;
+      
+      // Validate user profile data on write
+      allow create: if isOwner(userId) 
+        && hasValidEmail()
+        && isValidRole();
+      
+      allow update: if isOwner(userId)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['email', 'role']) 
+            || (hasValidEmail() && isValidRole()));
+      
+      // ========================================================================
+      // USER SUB-COLLECTIONS
+      // ========================================================================
+      
+      /**
+       * Training Systems sub-collection
+       * Users can only access their own training systems
+       */
+      match /trainingSystems/{systemId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      /**
+       * Milestones sub-collection
+       * Users can only access their own milestones
+       */
+      match /milestones/{milestoneId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      /**
+       * Workouts sub-collection
+       * Users can only access their own workouts
+       */
+      match /workouts/{workoutId} {
+        allow read, write: if isOwner(userId);
+        
+        /**
+         * Sessions sub-collection (within workouts)
+         * Users can only access sessions within their own workouts
+         */
+        match /sessions/{sessionId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+      
+      /**
+       * Profile sub-collection (if used in future)
+       * Users can only access their own profile data
+       */
+      match /profile/{profileId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // ============================================================================
+    // DEFAULT DENY ALL RULE
+    // ============================================================================
+    
+    /**
+     * Deny all access to any other collections or paths not explicitly defined above
+     * This ensures that no new collections can be accessed without explicit rules
+     */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

@@ -107,14 +107,18 @@ export async function sendPasswordReset(email) {
 }
 
 /**
- * Sign in with Google
- * @returns {Promise<import('firebase/auth').UserCredential>}
+ * Sign in with Google using popup (better developer experience, no redirect issues)
+ * Opens a popup window for Google sign-in and returns the result immediately
+ * @returns {Promise<import('firebase/auth').UserCredential>} User credential with authenticated user
  */
 export async function signInWithGoogle() {
   try {
     const provider = new GoogleAuthProvider();
+    
+    // signInWithPopup returns a promise that resolves with credentials immediately
     const userCredential = await signInWithPopup(auth, provider);
     return userCredential;
+    
   } catch (error) {
     console.error('Google sign in error:', error);
     throw new Error(`Google sign in failed: ${error.message}`);

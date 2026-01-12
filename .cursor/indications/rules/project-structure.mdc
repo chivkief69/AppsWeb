@@ -29,10 +29,15 @@ AppsWeb/
 │   └── styles.css                    # Main stylesheet with REGAIN design system (CSS variables)
 ├── docs/                             # Documentation files
 │   ├── ARCHITECTURE_DECISIONS.md    # Phase 1 architecture decisions
+│   ├── CHECKPOINT6-1-25.md          # Checkpoint document (Dec 31, 2025)
+│   ├── DEPLOYMENT_INSTRUCTIONS.md   # Firestore security rules deployment guide
 │   ├── FIRESTORE_SCHEMA.md          # Firestore database schema documentation
+│   ├── FIRESTORE_SECURITY_DEPLOYMENT.md  # Firestore security rules documentation
+│   ├── MIGRATION_VERIFICATION_SUMMARY.md  # Data migration verification summary
 │   ├── PHASE1_IMPLEMENTATION_CHECKLIST.md  # Phase 1 setup guide
 │   ├── PHASE1_SUMMARY.md            # Phase 1 summary
-│   └── PHASE2_SUMMARY.md            # Phase 2 summary
+│   ├── PHASE2_SUMMARY.md            # Phase 2 summary
+│   └── TESTING_CHECKLIST.md         # Testing checklist and guidelines
 ├── html/                             # Modular HTML templates
 │   ├── components/                   # Reusable UI components
 │   │   ├── sidebar.html             # Sidebar navigation component
@@ -83,6 +88,13 @@ AppsWeb/
 │   │   └── calendar.js              # Coach calendar view
 │   └── data/
 │       └── exercises.json           # Exercise database with variations, target muscles, technique cues
+├── scripts/                          # Deployment and utility scripts
+│   └── deploy-rules.ps1             # PowerShell script for deploying Firestore rules
+├── tests/                            # Test files directory (future)
+├── firebase.json                     # Firebase configuration (hosting, firestore rules)
+├── firestore.rules                   # Firestore security rules
+├── postcss.config.js                 # PostCSS configuration (for Tailwind processing)
+├── tailwind.config.js                # Tailwind CSS configuration
 ├── index.html                        # Minimal HTML shell - templates loaded dynamically
 ├── package.json                      # npm dependencies and scripts
 └── AppsWeb_31-12-2025.code-workspace # VS Code workspace file
@@ -186,14 +198,28 @@ AppsWeb/
   - `vite.config.js`: Vite build tool configuration (dev server, build settings, path aliases)
   - `env.template`: Environment variables template (copy to `.env` for Firebase credentials)
 
+#### Root-Level Configuration Files
+- **Purpose**: Configuration files that must be in the project root (tooling requirements)
+- **Files**:
+  - `firebase.json`: Firebase project configuration (hosting settings, firestore rules path, rewrites)
+  - `firestore.rules`: Firestore security rules (access control, data validation)
+  - `postcss.config.js`: PostCSS configuration for processing CSS (used by Vite/Tailwind)
+  - `tailwind.config.js`: Tailwind CSS configuration (theme customization, plugins, content paths)
+- **Note**: These files are in the root because build tools (Vite, Firebase CLI, PostCSS) expect them there by convention
+
 #### `docs/`
 - **Purpose**: Project documentation
 - **Files**:
   - `ARCHITECTURE_DECISIONS.md`: Phase 1 architecture decisions and rationale
+  - `CHECKPOINT6-1-25.md`: Comprehensive checkpoint document (December 31, 2025) - project state snapshot
+  - `DEPLOYMENT_INSTRUCTIONS.md`: Step-by-step guide for deploying Firestore security rules
   - `FIRESTORE_SCHEMA.md`: Complete Firestore database schema design
+  - `FIRESTORE_SECURITY_DEPLOYMENT.md`: Firestore security rules documentation and deployment guide
+  - `MIGRATION_VERIFICATION_SUMMARY.md`: Summary of localStorage to Firestore migration verification
   - `PHASE1_IMPLEMENTATION_CHECKLIST.md`: Step-by-step Phase 1 setup guide
   - `PHASE1_SUMMARY.md`: Phase 1 foundation summary
   - `PHASE2_SUMMARY.md`: Phase 2 UI integration and data migration summary
+  - `TESTING_CHECKLIST.md`: Testing checklist and guidelines for the project
 
 #### `css/styles.css`
 - **Purpose**: Main stylesheet implementing the REGAIN Design System
@@ -224,6 +250,17 @@ AppsWeb/
   - `project-structure.mdc`: This file - project structure documentation
 
 ### Assets
+
+#### `scripts/`
+- **Purpose**: Deployment and utility scripts
+- **Files**:
+  - `deploy-rules.ps1`: PowerShell script for deploying Firestore security rules to Firebase (automated deployment workflow)
+- **Usage**: Run scripts from project root (e.g., `.\scripts\deploy-rules.ps1`)
+
+#### `tests/`
+- **Purpose**: Test files directory
+- **Current State**: Empty (ready for test files)
+- **Future Usage**: Place test files here (unit tests, integration tests, etc.)
 
 #### `assets/`
 - **Purpose**: Static assets directory
@@ -258,28 +295,46 @@ AppsWeb/
    - Data files: `js/data/`
    - **All JS files use ES6 modules** (import/export)
 
-3. **Configuration Files**: Place in `config/` directory
-   - Build tool configs: `config/vite.config.js`
-   - Service configs: `config/firebase.config.js`
-   - Environment templates: `config/env.template`
-   - **Note**: Copy `env.template` to `.env` in root for local development
+3. **Configuration Files**: 
+   - Service configs: `config/` directory
+     - Build tool configs: `config/vite.config.js`
+     - Service configs: `config/firebase.config.js`
+     - Environment templates: `config/env.template`
+     - **Note**: Copy `env.template` to `.env` in root for local development
+   - Root-level configs (tooling requirements):
+     - `firebase.json`: Firebase project configuration (hosting, rules)
+     - `firestore.rules`: Firestore security rules
+     - `postcss.config.js`: PostCSS configuration (for Tailwind)
+     - `tailwind.config.js`: Tailwind CSS configuration
+     - **Note**: These must be in root as build tools expect them there
 
 4. **Documentation Files**: Place in `docs/` directory
    - Architecture docs: `docs/ARCHITECTURE_*.md`
    - Schema docs: `docs/*_SCHEMA.md`
    - Phase summaries: `docs/PHASE*_*.md`
    - Implementation guides: `docs/*_CHECKLIST.md`
+   - Deployment guides: `docs/DEPLOYMENT_*.md`
+   - Migration docs: `docs/MIGRATION_*.md`
+   - Checkpoint docs: `docs/CHECKPOINT*.md`
+   - Testing docs: `docs/TESTING_*.md`
 
-5. **Stylesheet Files**: Place in `css/` directory
+5. **Scripts**: Place in `scripts/` directory
+   - Deployment scripts: `scripts/*.ps1`, `scripts/*.sh`, etc.
+   - Utility scripts: Build automation, deployment automation, etc.
+
+6. **Tests**: Place in `tests/` directory (future)
+   - Unit tests, integration tests, etc.
+
+7. **Stylesheet Files**: Place in `css/` directory
    - Main styles: `css/styles.css` (uses CSS custom properties)
    - Additional stylesheets: `css/component-name.css` (if needed)
 
-6. **Static Assets**: Place in `assets/` directory
+8. **Static Assets**: Place in `assets/` directory
    - Images: `assets/images/`
    - Icons: `assets/icons/`
    - Fonts: `assets/fonts/`
 
-7. **Cursor Rules**: Place in `.cursor/rules/` directory
+9. **Cursor Rules**: Place in `.cursor/rules/` directory
    - Use kebab-case naming: `rule-name.mdc`
    - Follow structure defined in `cursor-rules.mdc`
 

@@ -13,6 +13,7 @@ import {
 } from '../core/auth-manager.js';
 
 let currentForm = 'login'; // 'login', 'signup', 'reset'
+let isShowingOverlay = false; // Flag to prevent immediate hiding
 
 /**
  * Initialize authentication UI
@@ -31,27 +32,139 @@ export function initAuthUI() {
  * @param {string} form - Form to show ('login', 'signup', 'reset')
  */
 export function showAuthOverlay(form = 'login') {
+    console.log('[DEBUG] showAuthOverlay called with form:', form);
+    
+    // Set flag to prevent immediate hiding
+    isShowingOverlay = true;
+    
     const overlay = document.getElementById('auth-overlay');
     if (!overlay) {
-        console.error('Auth overlay not found');
+        console.error('[DEBUG] Auth overlay not found in DOM');
+        console.error('[DEBUG] Document ready state:', document.readyState);
+        console.error('[DEBUG] Available elements with "auth" in id:', 
+            Array.from(document.querySelectorAll('[id*="auth"]')).map(el => el.id));
+        // Retry after a short delay in case templates are still loading
+        setTimeout(() => {
+            const retryOverlay = document.getElementById('auth-overlay');
+            if (retryOverlay) {
+                console.log('[DEBUG] Auth overlay found on retry, showing now');
+                showAuthOverlay(form);
+            } else {
+                console.error('[DEBUG] Auth overlay still not found after retry');
+            }
+        }, 100);
         return;
     }
     
+    // Check if template content has been loaded (the inner div with class 'auth-overlay')
+    let templateContent = overlay.querySelector('.auth-overlay') || overlay.firstElementChild;
+    if (!templateContent && overlay.innerHTML.trim() === '') {
+        console.warn('[DEBUG] Auth overlay template content not loaded yet, waiting...');
+        // Wait for template to load
+        setTimeout(() => {
+            showAuthOverlay(form);
+        }, 100);
+        return;
+    }
+    
+    console.log('[DEBUG] Auth overlay found, current classes:', overlay.className);
+    console.log('[DEBUG] Auth overlay has hidden class:', overlay.classList.contains('hidden'));
+    
     currentForm = form;
-    // Remove hidden from container
+    
+    // CRITICAL: Remove hidden class FIRST
     overlay.classList.remove('hidden');
+    
+    // CRITICAL: Remove any inline display:none that might have been set
+    if (overlay.style.display === 'none') {
+        overlay.style.display = ''; // Reset to default, let CSS handle it
+    }
+    
+    // CRITICAL: Ensure z-index is high enough to be above other content
+    // The template has z-[150] but we need to ensure the container doesn't interfere
+    if (!overlay.style.zIndex || parseInt(overlay.style.zIndex) < 150) {
+        overlay.style.zIndex = '150';
+    }
+    
+    // CRITICAL: Re-check template content if it wasn't found initially
+    if (!templateContent) {
+        templateContent = overlay.querySelector('.auth-overlay') || overlay.firstElementChild;
+    }
+    
+    // CRITICAL: Force visibility and opacity on the container
+    overlay.style.visibility = 'visible';
+    overlay.style.opacity = '1';
+    
+    // CRITICAL: Also ensure the inner template content is visible
+    if (templateContent) {
+        // Remove any inline styles that might hide it
+        if (templateContent.style.display === 'none') {
+            templateContent.style.display = '';
+        }
+        templateContent.style.visibility = 'visible';
+        templateContent.style.opacity = '1';
+        // Remove hidden class from inner content if it exists
+        if (templateContent.classList.contains('hidden')) {
+            templateContent.classList.remove('hidden');
+        }
+    }
+    
+    // Verify it's actually visible
+    requestAnimationFrame(() => {
+        const computedStyle = window.getComputedStyle(overlay);
+        const isVisible = !overlay.classList.contains('hidden') && 
+                         computedStyle.display !== 'none' && 
+                         computedStyle.visibility !== 'hidden' &&
+                         computedStyle.opacity !== '0';
+        
+        if (!isVisible) {
+            console.warn('[DEBUG] Auth overlay should be visible but computed styles indicate it is not. Forcing visibility...');
+            overlay.classList.remove('hidden');
+            overlay.style.display = 'flex';
+            overlay.style.visibility = 'visible';
+            overlay.style.opacity = '1';
+        }
+    });
+    
+    console.log('[DEBUG] Auth overlay hidden class removed');
+    console.log('[DEBUG] Auth overlay now has classes:', overlay.className);
+    console.log('[DEBUG] Auth overlay computed display:', window.getComputedStyle(overlay).display);
+    console.log('[DEBUG] Auth overlay computed visibility:', window.getComputedStyle(overlay).visibility);
     
     // Show appropriate form
     showForm(form);
+    
+    // Clear the flag after a short delay to allow the overlay to be fully rendered
+    setTimeout(() => {
+        isShowingOverlay = false;
+    }, 100);
+    
+    console.log('[DEBUG] showAuthOverlay completed');
 }
 
 /**
  * Hide authentication overlay
+ * @param {boolean} force - Force hide even if currently showing (use after successful auth)
  */
-export function hideAuthOverlay() {
+export function hideAuthOverlay(force = false) {
+    // Prevent hiding if we're currently showing the overlay
+    // UNLESS force is true (e.g., after successful authentication)
+    if (isShowingOverlay && !force) {
+        console.log('[DEBUG] hideAuthOverlay called but overlay is currently being shown, ignoring');
+        return;
+    }
+    
+    // Clear the flag if we're forcing hide
+    if (force) {
+        isShowingOverlay = false;
+    }
+    
     const overlay = document.getElementById('auth-overlay');
     if (overlay) {
+        // Add hidden class
         overlay.classList.add('hidden');
+        // Also set display to none to ensure it's hidden
+        overlay.style.display = 'none';
     }
     
     // Reset forms
@@ -106,7 +219,8 @@ function setupLoginForm() {
         try {
             await login(email, password);
             // Success - auth state change will handle navigation
-            hideAuthOverlay();
+            // Force hide the overlay after successful login
+            hideAuthOverlay(true);
         } catch (error) {
             showError('auth-error', getErrorMessage(error));
         } finally {
@@ -149,7 +263,8 @@ function setupSignupForm() {
         try {
             await signup(email, password, name);
             // Success - auth state change will handle navigation
-            hideAuthOverlay();
+            // Force hide the overlay after successful signup
+            hideAuthOverlay(true);
         } catch (error) {
             showError('auth-signup-error', getErrorMessage(error));
         } finally {
@@ -235,8 +350,11 @@ function setupGoogleLogin() {
             }
             
             hideError('auth-error');
+            
             await loginWithGoogle();
-            hideAuthOverlay();
+            
+            // Force hide the overlay after successful Google login
+            hideAuthOverlay(true);
         } catch (error) {
             showError('auth-error', getErrorMessage(error));
             if (btn) {
